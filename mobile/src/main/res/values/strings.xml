@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">DigitalWall</string>
     <string name="title_activity_slide">SlideActivity</string>
+    <string name="txt_cd">empty</string>
 </resources>

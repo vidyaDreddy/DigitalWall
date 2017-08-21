@@ -224,7 +224,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
                     CampaignModel model = new CampaignModel(jObject);
                     PlayerUtils.setData(PlayerActivity.this, rl_main, model);
 
-                    saveTheData(model);
+                    //saveTheData(model);
                 } else {
                     tv_display_key.setVisibility(View.VISIBLE);
                     rl_main.setVisibility(View.GONE);

@@ -6,16 +6,14 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.digitalwall.slidertypes.BaseSliderView;
-import com.digitalwall.slidertypes.DefaultSliderView;
-import com.digitalwall.Indicators.PagerIndicator;
 import com.digitalwall.R;
 import com.digitalwall.Tricks.ViewPagerEx;
 import com.digitalwall.activities.PlayerActivity;
 import com.digitalwall.model.AssetsModel;
 import com.digitalwall.model.CampaignModel;
 import com.digitalwall.model.ChannelModel;
+import com.digitalwall.slidertypes.SlideView;
 import com.digitalwall.views.SliderLayout;
-import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,6 +60,7 @@ public class PlayerUtils {
         final TextView tv_label = ChannelUtils.addChannelBottomLabel(parent, sl_layout);
         tv_label.setText("CAMPAIGN RUNNING");
         tv_label.setBackgroundColor(Utils.getColor(parent, R.color.black_over_lay));
+        tv_label.setVisibility(View.GONE);
 
 
         /*ASSIGNING THE ASSETS TO THE CHANNEL*/
@@ -69,17 +68,15 @@ public class PlayerUtils {
         for (int i = 0; i < mList.size(); i++) {
             AssetsModel model = mList.get(i);
 
-            DefaultSliderView textSliderView = new DefaultSliderView(parent);
-            textSliderView.setPicasso(Picasso.with(parent));
-            textSliderView.setScaleType(BaseSliderView.ScaleType.Fit);
 
-            String mediaType = model.getAssetType();
-            if (!Utils.isValueNullOrEmpty(mediaType) && mediaType.equalsIgnoreCase("video")) {
-                textSliderView.image(R.drawable.icon_no_video);
-            } else {
-                textSliderView.image(model.getAssetUrl());
-            }
-            sl_layout.addSlider(textSliderView);
+            SlideView slide = new SlideView(parent, model);
+            slide.setSlideType(model.getAssetType());
+            //slide.setPicasso(Picasso.with(parent));
+            slide.setScaleType(BaseSliderView.ScaleType.Fit);
+            slide.image(model.getAssetUrl());
+            sl_layout.addSlider(slide);
+
+
 
 
             /*SET SLIDE DURATION AND ANIMATION TO THE  ONLY 1ST ASSET*/
@@ -94,7 +91,6 @@ public class PlayerUtils {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
                 //sl_layout.setPresetTransformer(mList.get(0).getAssetAnimation());
             }
         }
@@ -109,11 +105,11 @@ public class PlayerUtils {
 
             @Override
             public void onPageSelected(int position) {
-                if (mList.size() > 0) {
-                    sl_layout.setDuration(mList.get(position).getAssetDuration());
-                    //parent.setDateToWebSocket("");
-                    //sl_layout.setPresetTransformer(mList.get(position).getAssetAnimation());
-                }
+
+                sl_layout.setDuration(mList.get(position).getAssetDuration());
+                //parent.setDateToWebSocket("");
+                //sl_layout.setPresetTransformer(mList.get(position).getAssetAnimation());
+
 
                /* if (position == 0) {
                     tv_label.setText("CAMPAIGN FINISHED");
@@ -127,6 +123,19 @@ public class PlayerUtils {
 
             }
         });
+    }
+
+
+    private SlideView createSlideView(PlayerActivity parent,AssetsModel model){
+
+        SlideView slide = new SlideView(parent, model);
+        slide.setSlideType(model.getAssetType());
+        //slide.setPicasso(Picasso.with(parent));
+        slide.setScaleType(BaseSliderView.ScaleType.Fit);
+        slide.image(model.getAssetUrl());
+
+        return slide;
+
     }
 
 }

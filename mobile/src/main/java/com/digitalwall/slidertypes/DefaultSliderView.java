@@ -13,7 +13,7 @@ import com.digitalwall.R;
  *
  * just extend BaseSliderView, and implement getView() method.
  */
-public class DefaultSliderView extends BaseSliderView {
+public class DefaultSliderView extends BaseSliderViewOld {
 
     public DefaultSliderView(Context context) {
         super(context);

@@ -49,6 +49,10 @@ public class ChannelModel {
             for (int i = 0; i < sArray.length(); i++) {
                 JSONObject aObject = sArray.getJSONObject(i);
                 AssetsModel model = new AssetsModel(aObject);
+                if (i == 1) {
+                    model.setAssetType("video");
+                    model.setAssetDuration(30000);
+                }
                 mList.add(model);
             }
         }
