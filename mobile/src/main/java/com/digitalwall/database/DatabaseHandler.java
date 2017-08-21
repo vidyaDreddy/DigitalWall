@@ -27,13 +27,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        db.execSQL(DBConstants.CREATE_TABLE_COLUMNS);
         db.execSQL(DBConstants.CREATE_TABLE_ASSET);
         Log.v("GeolyticsSDK", "Creating the Database");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + DBConstants.TABLE_ASSETS);
         onCreate(db);
     }
 

@@ -20,6 +20,7 @@ public class ChannelModel {
     private int channelLeftMargin;
     private int channelTopMargin;
     private String channelColor;
+    private String volume;
     private ArrayList<AssetsModel> assetsList;
 
 
@@ -42,6 +43,9 @@ public class ChannelModel {
 
         if (object.has("fill"))
             setChannelColor(object.getString("fill"));
+
+        if (object.has("volume"))
+            setVolume(object.getString("volume"));
 
         ArrayList<AssetsModel> mList = new ArrayList<>();
         if (object.has("assets")) {
@@ -114,5 +118,13 @@ public class ChannelModel {
 
     public void setChannelColor(String channelColor) {
         this.channelColor = channelColor;
+    }
+
+    public String getVolume() {
+        return volume;
+    }
+
+    public void setVolume(String volume) {
+        this.volume = volume;
     }
 }
