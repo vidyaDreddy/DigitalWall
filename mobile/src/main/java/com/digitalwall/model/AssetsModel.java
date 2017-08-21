@@ -14,6 +14,8 @@ public class AssetsModel {
     private String assetId;
     private String assetType;
     private String assetUrl;
+    private String channel_id;
+    private String asset_local_url;
 
 
     public AssetsModel(JSONObject object) throws JSONException {
@@ -29,6 +31,12 @@ public class AssetsModel {
 
         if (object.has("url"))
             setAssetUrl(object.getString("url"));
+
+        if (object.has("local_url"))
+            setAsset_local_url(object.getString("local_url"));
+
+        if (object.has("channel_id"))
+            setChannel_id(object.getString("channel_id"));
 
     }
 
@@ -63,5 +71,21 @@ public class AssetsModel {
 
     public void setAssetUrl(String assetUrl) {
         this.assetUrl = assetUrl;
+    }
+
+    public String getChannel_id() {
+        return channel_id;
+    }
+
+    public void setChannel_id(String channel_id) {
+        this.channel_id = channel_id;
+    }
+
+    public String getAsset_local_url() {
+        return asset_local_url;
+    }
+
+    public void setAsset_local_url(String asset_local_url) {
+        this.asset_local_url = asset_local_url;
     }
 }
