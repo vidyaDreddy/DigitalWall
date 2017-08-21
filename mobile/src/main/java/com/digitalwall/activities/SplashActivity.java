@@ -1,8 +1,11 @@
 package com.digitalwall.activities;
 
+import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.widget.TextView;
 
 import com.digitalwall.R;
@@ -12,6 +15,8 @@ import com.digitalwall.services.InputParams;
 import com.digitalwall.services.JSONRawTask;
 import com.digitalwall.services.JSONResult;
 import com.digitalwall.utils.DeviceInfo;
+import com.digitalwall.utils.Permissions;
+import com.digitalwall.utils.Utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,13 +43,71 @@ public class SplashActivity extends BaseActivity implements JSONResult {
         tv_info.setText(details);
 
 
-       /* String key = ApiConfiguration.getAuthToken(this, ApiConfiguration.PREF_KEY_DISPLAY_ID);
-        if (!key.isEmpty())
-            navigateToDashBoard();
-        else*/
-            registerDevice();
+        if (Utils.isMarshmallowOS()) {
+            Permissions.getInstance().setActivity(this);
+            CheckForPermissions(Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        } else {
+            initilizeViews();
+        }
+
 
     }
+
+
+    private void initilizeViews() {
+
+        String key = ApiConfiguration.getAuthToken(this, ApiConfiguration.PREF_KEY_DISPLAY_ID);
+        if (!key.isEmpty())
+            navigateToDashBoard();
+        else
+            registerDevice();
+    }
+
+
+    private void CheckForPermissions(final String... mPermisons) {
+        Permissions.getInstance().requestPermissions(new Permissions.IOnPermissionResult() {
+            @Override
+            public void onPermissionResult(Permissions.ResultSet resultSet) {
+                if (resultSet.isPermissionGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE) &&
+                        resultSet.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    initilizeViews();
+                } else {
+                    android.app.AlertDialog.Builder adb = new android.app.AlertDialog.Builder(SplashActivity.this);
+                    adb.setTitle(Permissions.TITLE);
+                    adb.setMessage(Permissions.MESSAGE);
+                    adb.setCancelable(false);
+                    adb.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            CheckForPermissions(mPermisons);
+                        }
+                    });
+                    adb.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            onBackPressed();
+                        }
+                    });
+                    adb.show();
+                }
+            }
+
+
+            @Override
+            public void onRationaleRequested(Permissions.IOnRationaleProvided callback, String... permissions) {
+                Permissions.getInstance().showRationaleInDialog(Permissions.TITLE,
+                        Permissions.MESSAGE, "Retry", callback);
+            }
+        }, mPermisons);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (Utils.isMarshmallowOS()) {
+            Permissions.getInstance().onRequestPermissionResult(requestCode, permissions, grantResults);
+        }
+    }
+
 
     private void registerDevice() {
 

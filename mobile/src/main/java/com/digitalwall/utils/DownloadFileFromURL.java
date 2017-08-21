@@ -82,5 +82,6 @@ public class DownloadFileFromURL extends AsyncTask<String, String, String> {
     @Override
     protected void onPostExecute(String file_url) {
         Log.v("DOWNLOADED", "URL PATH" + file_url);
+
     }
 }
