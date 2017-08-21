@@ -6,7 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
-import com.bizooku.SliderTypes.BaseSliderView;
+import com.digitalwall.slidertypes.BaseSliderView;
 
 import java.util.ArrayList;
 

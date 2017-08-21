@@ -5,8 +5,8 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.bizooku.SliderTypes.BaseSliderView;
-import com.bizooku.SliderTypes.DefaultSliderView;
+import com.digitalwall.slidertypes.BaseSliderView;
+import com.digitalwall.slidertypes.DefaultSliderView;
 import com.digitalwall.Indicators.PagerIndicator;
 import com.digitalwall.R;
 import com.digitalwall.Tricks.ViewPagerEx;

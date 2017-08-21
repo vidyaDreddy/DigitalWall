@@ -1,4 +1,4 @@
-package com.bizooku.SliderTypes;
+package com.digitalwall.slidertypes;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -13,7 +13,7 @@ import com.digitalwall.R;
  *
  * just extend BaseSliderView, and implement getView() method.
  */
-public class DefaultSliderView extends BaseSliderView{
+public class DefaultSliderView extends BaseSliderView {
 
     public DefaultSliderView(Context context) {
         super(context);

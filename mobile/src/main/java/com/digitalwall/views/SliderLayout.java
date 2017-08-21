@@ -12,7 +12,7 @@ import android.view.animation.Interpolator;
 import android.widget.RelativeLayout;
 
 
-import com.bizooku.SliderTypes.BaseSliderView;
+import com.digitalwall.slidertypes.BaseSliderView;
 import com.digitalwall.Indicators.PagerIndicator;
 import com.digitalwall.R;
 import com.digitalwall.Transformers.AccordionTransformer;

@@ -1,4 +1,4 @@
-package com.bizooku.database;
+package com.digitalwall.database;
 
 /**
  * Created by Shankar

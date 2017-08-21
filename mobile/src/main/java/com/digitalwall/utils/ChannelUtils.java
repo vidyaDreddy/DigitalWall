@@ -1,23 +1,14 @@
 package com.digitalwall.utils;
 
-import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.bizooku.SliderTypes.BaseSliderView;
-import com.bizooku.SliderTypes.DefaultSliderView;
 import com.digitalwall.Indicators.PagerIndicator;
 import com.digitalwall.R;
-import com.digitalwall.Tricks.ViewPagerEx;
 import com.digitalwall.activities.BaseActivity;
-import com.digitalwall.activities.PlayerActivity;
-import com.digitalwall.model.AssetsModel;
 import com.digitalwall.model.ChannelModel;
 import com.digitalwall.views.SliderLayout;
-import com.squareup.picasso.Picasso;
-
-import java.util.ArrayList;
 
 /**
  * Created by vidhayadhar
@@ -25,9 +16,6 @@ import java.util.ArrayList;
  */
 
 public class ChannelUtils {
-
-
-
 
 
     /*

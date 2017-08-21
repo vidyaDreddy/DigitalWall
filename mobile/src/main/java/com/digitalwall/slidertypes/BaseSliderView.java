@@ -1,4 +1,4 @@
-package com.bizooku.SliderTypes;
+package com.digitalwall.slidertypes;
 
 import android.content.Context;
 import android.os.Bundle;
