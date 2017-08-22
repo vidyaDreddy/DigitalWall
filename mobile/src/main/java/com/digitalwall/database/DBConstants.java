@@ -62,7 +62,7 @@ public class DBConstants {
             + COLUMN_ASSET_DURATION
             + " TEXT NOT NULL, "
             + CHANNELS_ID
-            + " TEXT NOT NULL PRIMARY KEY, "
+            + " TEXT NOT NULL, "
             + "FOREIGN KEY ( "
             + CHANNELS_ID
             + " ) REFERENCES "

@@ -6,6 +6,8 @@ import android.util.Log;
 
 import com.digitalwall.activities.BaseActivity;
 import com.digitalwall.activities.PlayerActivity;
+import com.digitalwall.database.AssetsSource;
+import com.digitalwall.database.ChannelSource;
 import com.digitalwall.model.AssetsModel;
 
 import java.io.BufferedInputStream;
@@ -82,6 +84,8 @@ public class DownloadFileFromURL extends AsyncTask<String, String, String> {
     @Override
     protected void onPostExecute(String file_url) {
         Log.v("DOWNLOADED", "URL PATH" + file_url);
-
+        model.setAsset_local_url(file_url);
+        AssetsSource assetsSource = new AssetsSource(parent);
+        assetsSource.insertData(model);
     }
 }

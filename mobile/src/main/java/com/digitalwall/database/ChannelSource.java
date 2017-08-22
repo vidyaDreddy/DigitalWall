@@ -12,7 +12,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class ColumnSource {
+public class ChannelSource {
 
     private SQLiteDatabase mDatabase;
     private DatabaseHandler mHandler;
@@ -21,7 +21,7 @@ public class ColumnSource {
             DBConstants.CHANNEL_HEIGHT, DBConstants.CHANNEL_WIDTH,
             DBConstants.CHANNEL_COLOR, DBConstants.CHANNEL_LEFT, DBConstants.CHANNEL_TOP, DBConstants.CHANNEL_VOLUME};
 
-    public ColumnSource(Context context) {
+    public ChannelSource(Context context) {
         if (context != null) {
             mContext = context;
             mHandler = new DatabaseHandler(mContext);

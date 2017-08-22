@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.digitalwall.R;
+import com.digitalwall.database.ChannelSource;
 import com.digitalwall.model.AssetsModel;
 import com.digitalwall.model.CampaignModel;
 import com.digitalwall.model.ChannelModel;
@@ -224,7 +225,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
                     CampaignModel model = new CampaignModel(jObject);
                     PlayerUtils.setData(PlayerActivity.this, rl_main, model);
 
-                    //saveTheData(model);
+                    saveTheData(model);
                 } else {
                     tv_display_key.setVisibility(View.VISIBLE);
                     rl_main.setVisibility(View.GONE);
@@ -241,30 +242,24 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
 
         }
 
-
     }
 
 
     private void saveTheData(CampaignModel model) {
-
         if (model.getChannelList().size() > 0) {
-
             for (int i = 0; i < model.getChannelList().size(); i++) {
-                ChannelModel model1 = model.getChannelList().get(i);
-
-                if (model1.getAssetsList().size() > 0) {
-                    for (int j = 0; j < model1.getAssetsList().size(); j++) {
-                        AssetsModel asset = model1.getAssetsList().get(j);
+                ChannelModel channelModel = model.getChannelList().get(i);
+                ChannelSource channelSource = new ChannelSource(PlayerActivity.this);
+                channelSource.insertData(channelModel);
+                if (channelModel.getAssetsList().size() > 0) {
+                    for (int j = 0; j < channelModel.getAssetsList().size(); j++) {
+                        AssetsModel asset = channelModel.getAssetsList().get(j);
+                        asset.setChannel_id(channelModel.getChannelId());
                         new DownloadFileFromURL(this, asset).execute();
                     }
-
                 }
-
             }
-
         }
-
-
     }
 
 
