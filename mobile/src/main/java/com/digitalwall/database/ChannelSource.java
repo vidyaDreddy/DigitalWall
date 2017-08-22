@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.digitalwall.model.AssetsModel;
 import com.digitalwall.model.ChannelModel;
 
 import org.json.JSONException;
@@ -19,7 +20,8 @@ public class ChannelSource {
     private Context mContext;
     private String mColumns[] = {DBConstants.CHANNELS_ID,
             DBConstants.CHANNEL_HEIGHT, DBConstants.CHANNEL_WIDTH,
-            DBConstants.CHANNEL_COLOR, DBConstants.CHANNEL_LEFT, DBConstants.CHANNEL_TOP, DBConstants.CHANNEL_VOLUME};
+            DBConstants.CHANNEL_COLOR, DBConstants.CHANNEL_LEFT, DBConstants.CHANNEL_TOP,
+            DBConstants.CHANNEL_VOLUME, DBConstants.CAMPAIGN_ID};
 
     public ChannelSource(Context context) {
         if (context != null) {
@@ -40,7 +42,7 @@ public class ChannelSource {
         }
     }
 
-    public long insertData(ChannelModel model) {
+    public long insertData(ChannelModel model, String campaignId) {
         long insertValue = -1;
 
         ContentValues values = new ContentValues();
@@ -51,7 +53,10 @@ public class ChannelSource {
         values.put(DBConstants.CHANNEL_LEFT, model.getChannelLeftMargin());
         values.put(DBConstants.CHANNEL_TOP, model.getChannelTopMargin());
         values.put(DBConstants.CHANNEL_VOLUME, model.getVolume());
+        values.put(DBConstants.CAMPAIGN_ID, campaignId);
+
         open();
+
         insertValue = mDatabase.insert(DBConstants.TABLE_CHANNELS, null,
                 values);
         close();
@@ -110,6 +115,47 @@ public class ChannelSource {
         return channelsList;
     }
 
+    /* Get model data depends on brand name */
+    public ArrayList<ChannelModel> selectAllChannelByCampaign(String campaingn_id) {
+        ArrayList<ChannelModel> channelList = null;
+        open();
+        Cursor cursor = mDatabase.query(DBConstants.TABLE_CHANNELS, mColumns,
+                DBConstants.CAMPAIGN_ID + " = ?", new String[]{campaingn_id}, null, null,
+                null);
+        if (cursor.getCount() > 0) {
+            channelList = new ArrayList<>();
+
+            while (cursor.moveToNext()) {
+
+                try {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("id", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.CHANNELS_ID)));
+                    jsonObject.put("height", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.CHANNEL_HEIGHT)));
+                    jsonObject.put("width", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.CHANNEL_WIDTH)));
+                    jsonObject.put("left", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.CHANNEL_LEFT)));
+                    jsonObject.put("top", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.CHANNEL_TOP)));
+                    jsonObject.put("fill", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.CHANNEL_COLOR)));
+                    jsonObject.put("volume", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.CHANNEL_VOLUME)));
+
+                    ChannelModel model = new ChannelModel(jsonObject);
+                    channelList.add(model);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        cursor.close();
+        close();
+        return channelList;
+    }
 
     /* Get brand count */
     public int getColumnDataCount() {

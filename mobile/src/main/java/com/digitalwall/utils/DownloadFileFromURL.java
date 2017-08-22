@@ -84,8 +84,5 @@ public class DownloadFileFromURL extends AsyncTask<String, String, String> {
     @Override
     protected void onPostExecute(String file_url) {
         Log.v("DOWNLOADED", "URL PATH" + file_url);
-        model.setAsset_local_url(file_url);
-        AssetsSource assetsSource = new AssetsSource(parent);
-        assetsSource.insertData(model);
     }
 }

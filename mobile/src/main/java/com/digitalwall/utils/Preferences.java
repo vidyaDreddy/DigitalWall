@@ -10,10 +10,13 @@ import android.content.SharedPreferences;
 
 public class Preferences {
 
+    public static final String CAMPAIGN_SCHEDULE = "CAMPAIGN_SCHEDULE";
+    public static final String CAMPAIGN_AUTO = "CAMPAIGN_AUTO";
+
     private static final String APP_PREF = "APP_PREF";
     public static final String PREF_KEY_CLIENT_ID = "PREF_KEY_CLIENT_ID";
     public static final String PREF_KEY_ORIENTATION = "PREF_KEY_ORIENTATION";
-    public static final String PREF_KEY_CAMPAIGN_ID = "PREF_KEY_CAMPAIGN_ID";
+    public static final String PREF_KEY_AUTO_CAMPAIGN_ID = "PREF_KEY_AUTO_CAMPAIGN_ID";
     public static final String PREF_KEY_VOLUME = "PREF_KEY_VOLUME";
 
 

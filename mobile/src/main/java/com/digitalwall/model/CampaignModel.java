@@ -11,7 +11,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 /**
- * Created by vidhayadhar on 01/08/17.
+ * Created by vidhayadhar
+ * on 01/08/17.
  */
 
 public class CampaignModel {
@@ -21,6 +22,7 @@ public class CampaignModel {
     private String campaignName;
     private String clientId;
     private String status;
+    private String campaignType;
     private String layoutOrientation;
     private ArrayList<ChannelModel> channelList;
 
@@ -39,6 +41,9 @@ public class CampaignModel {
 
         if (object.has("clientID"))
             setClientId(object.getString("clientID"));
+
+        if (object.has("type"))
+            setCampaignType(object.getString("type"));
 
         if (object.has("layout")) {
             JSONObject lObject = object.getJSONObject("layout");
@@ -113,5 +118,13 @@ public class CampaignModel {
 
     public void setChannelList(ArrayList<ChannelModel> channelList) {
         this.channelList = channelList;
+    }
+
+    public String getCampaignType() {
+        return campaignType;
+    }
+
+    public void setCampaignType(String campaignType) {
+        this.campaignType = campaignType;
     }
 }

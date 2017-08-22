@@ -4,13 +4,18 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 /**
- * Created by piyush on 07/10/16.
+ * Created by piyush
+ * on 07/10/16.
  */
 public class Job {
 
-    /** Job parameters */
+    /**
+     * Job parameters
+     */
     private final int jobId;
     private final int jobType;
+    private final String jobCampaignId;
+    private final String jobClientId;
     private final SmartScheduler.JobScheduledCallback jobScheduledCallback;
     private final String periodicTaskTag;
     private final boolean requireCharging;
@@ -23,27 +28,45 @@ public class Job {
     // Threshold to schedule via Handlers
     protected static final long JOB_TYPE_HANDLER_THRESHOLD = 60000;
 
-    /** Network Types*/
+    /**
+     * Network Types
+     */
     public abstract class NetworkType {
-        /** Default */
+        /**
+         * Default
+         */
         public static final int NETWORK_TYPE_ANY = 2;
-        /** This job requires network connectivity */
+        /**
+         * This job requires network connectivity
+         */
         public static final int NETWORK_TYPE_CONNECTED = 0;
-        /** This job requires network connectivity that is unmetered */
+        /**
+         * This job requires network connectivity that is unmetered
+         */
         public static final int NETWORK_TYPE_UNMETERED = 1;
     }
 
-    /** Job Types*/
+    /**
+     * Job Types
+     */
     public abstract class Type {
-        /** Default */
+        /**
+         * Default
+         */
         public static final int JOB_TYPE_NONE = 0;
-        /** Use Handler type job if the frequency required for the Job is small enough that it can't
-         * be accomplished by using PeriodicTasks */
+        /**
+         * Use Handler type job if the frequency required for the Job is small enough that it can't
+         * be accomplished by using PeriodicTasks
+         */
         public static final int JOB_TYPE_HANDLER = 1;
-        /** Use Periodic_Task type job if the frequency required for the Job
-         * can be accomplished by using PeriodicTasks */
+        /**
+         * Use Periodic_Task type job if the frequency required for the Job
+         * can be accomplished by using PeriodicTasks
+         */
         public static final int JOB_TYPE_PERIODIC_TASK = 2;
-        /** Use Alarm type job if the frequency required for the Job is large enough to be using alarms */
+        /**
+         * Use Alarm type job if the frequency required for the Job is large enough to be using alarms
+         */
         public static final int JOB_TYPE_ALARM = 3;
     }
 
@@ -75,6 +98,15 @@ public class Job {
     public int getJobType() {
         return jobType;
     }
+
+    public String getJobCampaignId() {
+        return jobCampaignId;
+    }
+
+    public String getJobClientId() {
+        return jobClientId;
+    }
+
 
     /**
      * Name of the callback class that will be called when Job is scheduled by the SmartScheduler.
@@ -157,6 +189,8 @@ public class Job {
     private Job(Job.Builder b) {
         jobId = b.mJobId;
         jobType = b.mJobType;
+        jobCampaignId = b.mJobCampaignId;
+        jobClientId = b.mJobClientId;
         jobScheduledCallback = b.mJobScheduledCallback;
         periodicTaskTag = b.mPeriodicTaskTag;
         requireCharging = b.mRequiresCharging;
@@ -172,6 +206,8 @@ public class Job {
      */
     public static final class Builder {
         private int mJobId;
+        private String mJobCampaignId;
+        private String mJobClientId;
         private int mJobType = Job.Type.JOB_TYPE_NONE;
         private SmartScheduler.JobScheduledCallback mJobScheduledCallback;
 
@@ -191,31 +227,6 @@ public class Job {
 
         private Long mFlexInMillis = null;
 
-        /**
-         * @param jobScheduledCallback The endpoint that you implement that will receive the callback from the
-         *                             SmartScheduler.
-         * @param periodicTaskTag      Tag for the PeriodicTask to be set for PeriodicTask type jobs.
-         */
-        public Builder(SmartScheduler.JobScheduledCallback jobScheduledCallback,
-                       @NonNull String periodicTaskTag) {
-            generateJobID();
-            mJobScheduledCallback = jobScheduledCallback;
-            mPeriodicTaskTag = periodicTaskTag;
-        }
-
-        /**
-         * @param jobScheduledCallback The endpoint that you implement that will receive the callback from the
-         *                             SmartScheduler.
-         * @param jobType              Type of Job to be scheduled
-         * @param periodicTaskTag      Tag for the PeriodicTask to be set for PeriodicTask type jobs.
-         */
-        public Builder(SmartScheduler.JobScheduledCallback jobScheduledCallback, int jobType,
-                       @Nullable String periodicTaskTag) {
-            generateJobID();
-            mJobScheduledCallback = jobScheduledCallback;
-            mPeriodicTaskTag = periodicTaskTag;
-            mJobType = jobType;
-        }
 
         /**
          * @param jobId                Application-provided id for this job. Subsequent calls to cancel, or
@@ -225,27 +236,13 @@ public class Job {
          *                             SmartScheduler.
          * @param periodicTaskTag      Tag for the PeriodicTask to be set for PeriodicTask type jobs.
          */
-        public Builder(int jobId, SmartScheduler.JobScheduledCallback jobScheduledCallback,
-                       @NonNull String periodicTaskTag) {
+        public Builder(int jobId, String jobCampaignId, SmartScheduler.JobScheduledCallback jobScheduledCallback,
+                       @Nullable String periodicTaskTag, String jobClientId) {
             mJobScheduledCallback = jobScheduledCallback;
             mPeriodicTaskTag = periodicTaskTag;
-            mJobId = jobId;
-        }
-
-        /**
-         * @param jobId                Application-provided id for this job. Subsequent calls to cancel, or
-         *                             jobs created with the same jobId, will update the pre-existing job with
-         *                             the same id.
-         * @param jobScheduledCallback The endpoint that you implement that will receive the callback from the
-         *                             SmartScheduler.
-         * @param jobType              Type of Job to be scheduled
-         * @param periodicTaskTag      Tag for the PeriodicTask to be set for PeriodicTask type jobs.
-         */
-        public Builder(int jobId, SmartScheduler.JobScheduledCallback jobScheduledCallback, int jobType,
-                       @Nullable String periodicTaskTag) {
-            mJobScheduledCallback = jobScheduledCallback;
-            mPeriodicTaskTag = periodicTaskTag;
-            mJobType = jobType;
+            mJobType = Type.JOB_TYPE_ALARM;
+            mJobCampaignId = jobCampaignId;
+            mJobClientId = jobClientId;
             mJobId = jobId;
         }
 
@@ -255,7 +252,6 @@ public class Job {
          *
          * @param periodicTaskTag tag for the PeriodicTask to be set for
          *                        {@link Job.Type#JOB_TYPE_PERIODIC_TASK} job.
-         *
          * @return Returns the Builder class for currently configured Job params
          */
         public Builder setPeriodicTaskTag(String periodicTaskTag) {
@@ -271,7 +267,6 @@ public class Job {
          * job. If the network requested is not available your job will never run.
          *
          * @param networkType NetworkType to be set for the job.
-         *
          * @return Returns the Builder class for currently configured Job params
          */
         public Builder setRequiredNetworkType(int networkType) {
@@ -284,7 +279,6 @@ public class Job {
          * false.
          *
          * @param requiresCharging Whether or not the device is plugged in.
-         *
          * @return Returns the Builder class for currently configured Job params
          */
         public Builder setRequiresCharging(boolean requiresCharging) {
@@ -296,7 +290,6 @@ public class Job {
          * Specify that this job should happen only once after the provided interval has elapsed.
          *
          * @param intervalMillis Millisecond interval after which this job has to be performed.
-         *
          * @return Returns the Builder class for currently configured Job params
          */
         public Builder setIntervalMillis(long intervalMillis) {
@@ -309,8 +302,7 @@ public class Job {
          * Specify that how close to the end of the period should this job be executed
          * in a recur with the provided interval, not more than once per period.
          *
-         * @param flexInMillis        Millisecond interval for which this job will repeat.
-         *
+         * @param flexInMillis Millisecond interval for which this job will repeat.
          * @return Returns the Builder class for currently configured Job params
          */
         public Builder setFlex(long flexInMillis) {
@@ -323,7 +315,6 @@ public class Job {
          * period.
          *
          * @param intervalMillis Millisecond interval for which this job will repeat.
-         *
          * @return Returns the Builder class for currently configured Job params
          */
         public Builder setPeriodic(long intervalMillis) {
@@ -337,9 +328,8 @@ public class Job {
          * Specify that this job should recur with the provided interval, not more than once per
          * period.
          *
-         * @param intervalMillis        Millisecond interval for which this job will repeat.
-         * @param initialDelayInMillis  Initial Delay (in millis) for the job's first occurrence.
-         *
+         * @param intervalMillis       Millisecond interval for which this job will repeat.
+         * @param initialDelayInMillis Initial Delay (in millis) for the job's first occurrence.
          * @return Returns the Builder class for currently configured Job params
          */
         public Builder setPeriodic(long intervalMillis, long initialDelayInMillis) {
@@ -353,21 +343,7 @@ public class Job {
          * @return The job object to hand to the SmartScheduler. This object is immutable.
          */
         public Job build() {
-            if (mJobType == Job.Type.JOB_TYPE_NONE) {
-
-                // Schedule via Handlers if mIntervalMillis is less than JOB_TYPE_HANDLER_THRESHOLD
-                if (mIntervalMillis < JOB_TYPE_HANDLER_THRESHOLD) {
-                    mJobType = Job.Type.JOB_TYPE_HANDLER;
-
-                    // Schedule via PeriodicTask if job requires charging or network connectivity
-                } else if (mRequiresCharging || mNetworkType != Job.NetworkType.NETWORK_TYPE_ANY) {
-                    mJobType = Job.Type.JOB_TYPE_PERIODIC_TASK;
-
-                } else {
-                    mJobType = Job.Type.JOB_TYPE_ALARM;
-                }
-            }
-
+            mJobType = Job.Type.JOB_TYPE_ALARM;
             return new Job(this);
         }
     }
@@ -377,6 +353,8 @@ public class Job {
         return "Job{" +
                 "jobId=" + jobId +
                 ", jobType=" + jobType +
+                ", jobCampaignId=" + jobCampaignId +
+                ", jobClientId=" + jobClientId +
                 ", jobScheduledCallback=" + (jobScheduledCallback != null ? jobScheduledCallback : " null") +
                 ", periodicTaskTag='" + (periodicTaskTag != null ? periodicTaskTag : " null") +
                 ", requireCharging=" + requireCharging +
@@ -410,6 +388,7 @@ public class Job {
     public int hashCode() {
         int result = jobId;
         result = 31 * result + jobType;
+        result = 31 * result + jobCampaignId.hashCode();
         result = 31 * result + jobScheduledCallback.hashCode();
         result = 31 * result + periodicTaskTag.hashCode();
         result = 31 * result + (requireCharging ? 1 : 0);

@@ -11,7 +11,9 @@ import android.widget.ImageView;
 import com.digitalwall.R;
 import com.digitalwall.utils.UImageLoader;
 import com.digitalwall.views.TextureVideoView;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.RequestCreator;
 
 import java.io.File;
 
@@ -70,11 +72,8 @@ public abstract class BaseSliderView {
      * @param file
      * @return
      */
-    public BaseSliderView image(File file) {
-        if (mUrl != null || mRes != 0) {
-            throw new IllegalStateException("Call multi image function," +
-                    "you only have permission to call it once");
-        }
+    public BaseSliderView imageFile(File file) {
+
         mFile = file;
         return this;
     }
@@ -140,18 +139,29 @@ public abstract class BaseSliderView {
                 String fileName = "android.resource://" + getContext().getPackageName() + "/raw/sample";
                 //tv_video.setVideoURI(Uri.parse("http://techslides.com/demos/sample-videos/small.mp4"));
                 tv_video.setVideoURI(Uri.parse(fileName));
-
-
                 tv_video.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                     @Override
                     public void onPrepared(MediaPlayer mp) {
+                        tv_video.setVisibility(View.VISIBLE);
                         tv_video.start();
                         try {
-                            //mp.setLooping(true);
-                            mp.setVolume(0, 0);
+                            mp.setVolume(1, 1);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+                        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                            @Override
+                            public void onCompletion(MediaPlayer mp) {
+                                mp.setVolume(0, 0);
+                            }
+                        });
+                    }
+                });
+                tv_video.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+                    @Override
+                    public void onCompletion(MediaPlayer mp) {
+                        //mp.setVolume(0, 0);
                     }
                 });
             } catch (IllegalStateException e) {
@@ -162,39 +172,29 @@ public abstract class BaseSliderView {
             targetImageView.setVisibility(View.VISIBLE);
             fl_video.setVisibility(View.GONE);
 
-             /*ACTIVITY IMAGE*/
-            UImageLoader.URLPicLoading(targetImageView, mUrl, R.drawable.icon_no_video);
 
-           /* if (mLoadListener != null) {
+            /*if (mUrl.contains("http")) {
+                UImageLoader.URLPicLoading(targetImageView, mUrl, R.drawable.icon_no_video);
+            } else {
+                UImageLoader.URLPicLoadingFile(targetImageView, mUrl, R.drawable.icon_no_video);
+            }*/
+
+            if (mLoadListener != null) {
                 mLoadListener.onStart(me);
             }
 
             Picasso p = (mPicasso != null) ? mPicasso : Picasso.with(mContext);
             RequestCreator rq = null;
-            if (mUrl != null) {
-                rq = p.load(mUrl);
-            } else if (mFile != null) {
+            if (mFile != null) {
                 rq = p.load(mFile);
-            } else if (mRes != 0) {
-                rq = p.load(mRes);
+            } else if (mUrl != null) {
+                rq = p.load(mUrl);
             } else {
                 return;
             }
 
             if (rq == null) {
                 return;
-            }
-
-            switch (mScaleType) {
-                case Fit:
-                    rq.fit();
-                    break;
-                case CenterCrop:
-                    rq.fit().centerCrop();
-                    break;
-                case CenterInside:
-                    rq.fit().centerInside();
-                    break;
             }
 
             rq.into(targetImageView, new Callback() {
@@ -215,7 +215,6 @@ public abstract class BaseSliderView {
                     }
                 }
             });
-*/
 
         }
 
@@ -248,7 +247,6 @@ public abstract class BaseSliderView {
     public void setOnImageLoadListener(ImageLoadListener l) {
         mLoadListener = l;
     }
-
 
 
     /**

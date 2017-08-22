@@ -17,6 +17,8 @@ import android.view.WindowManager;
 
 import com.digitalwall.activities.BaseActivity;
 
+import java.util.Random;
+
 /**
  * Created by vidhayadhar on 30/07/17.
  */
@@ -134,5 +136,11 @@ public class DeviceInfo {
             return 1080;
         else
             return 1920;
+    }
+
+    public static int randomJobId() {
+        Random rand = new Random();
+        return rand.nextInt(100000000);
+
     }
 }

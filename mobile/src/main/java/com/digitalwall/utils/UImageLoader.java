@@ -38,6 +38,7 @@ public class UImageLoader {
     }
 
     public static void URLPicLoadingFile(ImageView ivImageView, String fileUrl, int placeholder) {
+        fileUrl = fileUrl.replace(" ", "%20");
 
         String decodedImgUri = Uri.fromFile(new File(fileUrl)).toString();
 

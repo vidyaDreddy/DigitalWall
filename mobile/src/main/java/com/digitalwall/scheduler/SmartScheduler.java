@@ -25,16 +25,12 @@ public class SmartScheduler {
 
     private static final String TAG = SmartScheduler.class.getSimpleName();
     public static final String ALARM_JOB_ID_KEY = "io.hypertrack.android_scheduler:AlarmJobID";
-    public static final String PERIODIC_TASK_JOB_ID_KEY = "io.hypertrack.android_scheduler:PeriodicTaskJobID";
 
     private static SmartScheduler smartScheduler;
 
     private Context mContext;
     private HashMap<Integer, Job> scheduledJobs;
 
-    // For Handler type jobs
-    private HashMap<Integer, Handler> jobHandlers;
-    private HashMap<Integer, Runnable> jobRunnables;
 
     public static SmartScheduler getInstance(Context context) {
         if (smartScheduler == null) {
@@ -51,8 +47,6 @@ public class SmartScheduler {
     private SmartScheduler(Context context) {
         mContext = context;
         scheduledJobs = new HashMap<>();
-        jobHandlers = new HashMap<>();
-        jobRunnables = new HashMap<>();
     }
 
     /**
@@ -203,7 +197,6 @@ public class SmartScheduler {
     }
 
 
-
     private boolean addAlarmJob(Job job) {
         try {
             Bundle bundle = new Bundle();
@@ -213,7 +206,6 @@ public class SmartScheduler {
             intent.putExtras(bundle);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, job.getJobId(), intent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
-
 
 
             //Set the alarm for the first time and update the same in SharedPreferences

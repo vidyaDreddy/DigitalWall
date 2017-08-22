@@ -1,6 +1,7 @@
 package com.digitalwall.utils;
 
 import android.graphics.Color;
+import android.net.ParseException;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -53,10 +54,18 @@ public class ChannelUtils {
 
         /*CREATING THE TILE WITH CALCULATED PARAMS */
         SliderLayout rl_tile = new SliderLayout(parent);
+        //rl_tile.setId((Integer.parseInt(mTile.getChannelId())));
         rl_tile.setId((position));
         rl_tile.setLayoutParams(paramsTile);
 
-        rl_tile.setBackgroundColor(Utils.getColor(parent, R.color.colorAccent));
+        try {
+            String color = mTile.getChannelColor();
+            rl_tile.setBackgroundColor(Color.parseColor(color));
+        } catch (ParseException e) {
+            e.printStackTrace();
+            rl_tile.setBackgroundColor(Utils.getColor(parent, R.color.colorPrimaryDark));
+        }
+
         rl_tile.setIndicatorVisibility(PagerIndicator.IndicatorVisibility.Invisible);
 
         return rl_tile;

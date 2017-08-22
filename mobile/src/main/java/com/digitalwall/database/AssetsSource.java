@@ -74,7 +74,7 @@ public class AssetsSource {
     }
 
     /* Get model data depends on brand name */
-    public ArrayList<AssetsModel> selectAllAssetssByChannel(String channel_id) {
+    public ArrayList<AssetsModel> getAssetListByChannelId(String channel_id) {
         ArrayList<AssetsModel> assetsList = null;
         open();
         Cursor cursor = mDatabase.query(DBConstants.TABLE_ASSETS, mColumns,
@@ -150,7 +150,7 @@ public class AssetsSource {
     public int deleteAll() {
         int deleteValue = -1;
         open();
-        deleteValue = mDatabase.delete(DBConstants.TABLE_CHANNELS, null, null);
+        deleteValue = mDatabase.delete(DBConstants.TABLE_ASSETS, null, null);
         close();
         return deleteValue;
     }
