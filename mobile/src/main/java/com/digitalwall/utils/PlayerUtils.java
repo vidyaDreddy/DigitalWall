@@ -59,7 +59,6 @@ public class PlayerUtils {
         rl_main.removeAllViews();
 
         ArrayList<ChannelModel> channelList = campaignModel.getChannelList();
-
         if (channelList.size() > 0) {
             for (int i = 0; i < channelList.size(); i++) {
                 /*CREATE THE CHANNEL*/
@@ -67,7 +66,6 @@ public class PlayerUtils {
                 SliderLayout sl_layout = ChannelUtils.createChannel(parent, i, channel);
                 initilizeViewPagerWithAssets(parent, sl_layout, channel);
                 rl_main.addView(sl_layout);
-
             }
         }
 
@@ -93,10 +91,11 @@ public class PlayerUtils {
             SlideView slide = new SlideView(parent, model);
             slide.setSlideType(model.getAssetType());
             slide.setPicasso(Picasso.with(parent));
+            slide.image(model.getAssetUrl());
+
             if (!Utils.isValueNullOrEmpty(model.getAsset_local_url()))
                 slide.imageFile(new File(model.getAsset_local_url()));
-            else
-                slide.image(model.getAssetUrl());
+
             sl_layout.addSlider(slide);
 
 

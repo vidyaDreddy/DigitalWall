@@ -168,13 +168,13 @@ public class SmartScheduler {
         if (job.getRequiresCharging() && !isCharging())
             return;
 
-        // Check if the scheduled Job meets its net connectivity requirements
+       /* // Check if the scheduled Job meets its net connectivity requirements
         if (job.getNetworkType() == Job.NetworkType.NETWORK_TYPE_CONNECTED && !isConnected())
             return;
 
         // Check if the scheduled Job meets its net connectivity metering requirements
         if (job.getNetworkType() == Job.NetworkType.NETWORK_TYPE_UNMETERED && !isConnected() && !isConnectionUnMetered())
-            return;
+            return;*/
 
         // Schedule the Job as all its requirements are met
         job.getJobScheduledCallback().onJobScheduled(mContext, job);

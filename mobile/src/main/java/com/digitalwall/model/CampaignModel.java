@@ -56,6 +56,7 @@ public class CampaignModel {
                 for (int i = 0; i < cArray.length(); i++) {
                     JSONObject cObject = cArray.getJSONObject(i);
                     ChannelModel model = new ChannelModel(cObject);
+                    model.setChannelId(getCampaignId() + model.getChannelId());
                     mList.add(model);
                 }
             }

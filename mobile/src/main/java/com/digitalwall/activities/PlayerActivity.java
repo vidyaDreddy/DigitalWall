@@ -26,6 +26,7 @@ import com.digitalwall.services.JSONResult;
 import com.digitalwall.services.JSONTask;
 import com.digitalwall.utils.DeviceInfo;
 import com.digitalwall.utils.DownloadFileFromURL;
+import com.digitalwall.utils.DownloadScheFileTask;
 import com.digitalwall.utils.PlayerUtils;
 import com.digitalwall.utils.Preferences;
 import com.digitalwall.utils.Utils;
@@ -53,12 +54,15 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
     private TextView tv_display_key;
     private RelativeLayout rl_main;
     public String display_key;
+    public String autoCampaignId;
 
     private SmartScheduler jobScheduler;
 
     private ProgressDialog progressBar;
 
     private CampaignSource campaignDB;
+
+    private boolean playLiveData = false;
 
 
     @Override
@@ -88,15 +92,13 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
         tv_display_key.setVisibility(View.GONE);
 
         /*CHECK FOR THE PLAYER INFO*/
-        String autoCampaignId = Preferences.getStringSharedPref(this, Preferences.PREF_KEY_AUTO_CAMPAIGN_ID);
+        autoCampaignId = Preferences.getStringSharedPref(this, Preferences.PREF_KEY_AUTO_CAMPAIGN_ID);
         if (!Utils.isValueNullOrEmpty(autoCampaignId)) {
             if (campaignDB.isCampaignDataAvailable(autoCampaignId)) {
                 createCampaignPlayer(autoCampaignId);
             } else {
                 getAutoCampaignChannelInfo(autoCampaignId);
             }
-
-            //getScheduleCampaignInfo("dMXzsMOpp", "2jaew-bpM");
         } else {
             /*DISPLAY ID*/
             tv_display_key.setVisibility(View.VISIBLE);
@@ -181,8 +183,8 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
     private void configureAutoCampaignPlayer(JSONObject jObject) throws JSONException {
 
         /*CAMPAIGN ID*/
-        String campaignId = jObject.getString("campID");
-        Preferences.setStringSharedPref(this, Preferences.PREF_KEY_AUTO_CAMPAIGN_ID, campaignId);
+        autoCampaignId = jObject.getString("campID");
+        Preferences.setStringSharedPref(this, Preferences.PREF_KEY_AUTO_CAMPAIGN_ID, autoCampaignId);
 
         /*CLIENT ID*/
         String clientID = jObject.getString("clientID");
@@ -197,7 +199,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
         Preferences.setStringSharedPref(this, Preferences.PREF_KEY_ORIENTATION, deviceOrientation);
 
         /*GET CHANNEL INFO FOR AUTO CAMPAIGN*/
-        getAutoCampaignChannelInfo(campaignId);
+        getAutoCampaignChannelInfo(autoCampaignId);
     }
 
     private void getAutoCampaignChannelInfo(String campaignId) {
@@ -280,7 +282,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
                     rl_main.setVisibility(View.VISIBLE);
                     CampaignModel model = new CampaignModel(jObject);
 
-                    saveTheData(model);
+                    saveAutoCampaignData(model);
                 } else {
                     tv_display_key.setVisibility(View.VISIBLE);
                     rl_main.setVisibility(View.GONE);
@@ -312,7 +314,12 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
                 String status = jObject.optString("status");
                 if (status.equalsIgnoreCase("success")) {
                     CampaignModel model = new CampaignModel(jObject);
-                    PlayerUtils.setLiveData(PlayerActivity.this, rl_main, model);
+
+                    if (playLiveData)
+                        PlayerUtils.setLiveData(PlayerActivity.this, rl_main, model);
+                    else
+                        saveScheduleCampaignData(model);
+
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -328,6 +335,14 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
         String campaignId = model.getScheduleCampaignId();
         String clientId = model.getScheduleClientId();
 
+
+        /*DOWNLOAD AND SYNC THE SCHEDULE INFO*/
+        if (!campaignDB.isCampaignDataAvailable(campaignId)) {
+            playLiveData = false;
+            getScheduleChannelInfo(clientId, campaignId);
+        }
+
+
         ArrayList<ScheduleDateModel> mList = model.getmScheduleList();
         for (int i = 0; i < mList.size(); i++) {
             ScheduleDateModel date = mList.get(i);
@@ -341,24 +356,45 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
              /*SCHEDULE THE EVENT WITH END TIME*/
             Calendar eCal = date.geteDate();
             int eJobId = DeviceInfo.randomJobId();
-            setSchedulerPlayer(eJobId, campaignId, clientId,
+            setSchedulerPlayer(eJobId, autoCampaignId, clientId,
                     Preferences.CAMPAIGN_AUTO, eCal.getTimeInMillis());
         }
 
     }
 
-
-    private void saveTheData(CampaignModel model) {
+    private void saveScheduleCampaignData(CampaignModel model) {
 
         campaignDB.insertData(model);
 
         if (model.getChannelList().size() > 0) {
+            ChannelSource channelDB = new ChannelSource(this);
 
             for (int i = 0; i < model.getChannelList().size(); i++) {
+                ChannelModel channelModel = model.getChannelList().get(i);
+                channelDB.insertData(channelModel, model.getCampaignId());
 
+                if (channelModel.getAssetsList().size() > 0) {
+                    for (int j = 0; j < channelModel.getAssetsList().size(); j++) {
+                        AssetsModel asset = channelModel.getAssetsList().get(j);
+                        asset.setChannel_id(channelModel.getChannelId());
+                        new DownloadScheFileTask(this, asset).execute();
+                    }
+                }
+            }
+        }
+    }
+
+
+    private void saveAutoCampaignData(CampaignModel model) {
+
+        campaignDB.insertData(model);
+
+        ChannelSource channelDB = new ChannelSource(this);
+        if (model.getChannelList().size() > 0) {
+
+            for (int i = 0; i < model.getChannelList().size(); i++) {
                 ChannelModel channelModel = model.getChannelList().get(i);
 
-                ChannelSource channelDB = new ChannelSource(this);
                 channelDB.insertData(channelModel, model.getCampaignId());
 
                 if (channelModel.getAssetsList().size() > 0) {
@@ -400,24 +436,25 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
         /*SET THE CHANNEL LIST INFO*/
         ChannelSource channelDB = new ChannelSource(this);
         ArrayList<ChannelModel> mChannelList = channelDB.selectAllChannelByCampaign(campaignId);
-        campaignModel.setChannelList(mChannelList);
 
-        /*SET THE ASSET LIST INFO*/
-        AssetsSource assetsDB = new AssetsSource(this);
-        for (int i = 0; i < mChannelList.size(); i++) {
-            ChannelModel channel = mChannelList.get(i);
-            ArrayList<AssetsModel> mAssetsList = assetsDB.getAssetListByChannelId(channel.getChannelId());
-            channel.setAssetsList(mAssetsList);
+        if (mChannelList != null) {
+            campaignModel.setChannelList(mChannelList);
+
+             /*SET THE ASSET LIST INFO*/
+            AssetsSource assetsDB = new AssetsSource(this);
+            for (int i = 0; i < mChannelList.size(); i++) {
+                ChannelModel channel = mChannelList.get(i);
+                ArrayList<AssetsModel> mAssetsList = assetsDB.getAssetListByChannelId(channel.getChannelId());
+                channel.setAssetsList(mAssetsList);
+            }
+
+            if (campaignModel.getChannelList().size() > 0) {
+
+                tv_display_key.setVisibility(View.GONE);
+                rl_main.setVisibility(View.VISIBLE);
+                PlayerUtils.setAutoCampaignPlayerData(this, rl_main, campaignModel);
+            }
         }
-
-        if (campaignModel.getChannelList().size() > 0) {
-
-            tv_display_key.setVisibility(View.GONE);
-            rl_main.setVisibility(View.VISIBLE);
-            PlayerUtils.setAutoCampaignPlayerData(this, rl_main, campaignModel);
-        }
-
-
     }
 
 
@@ -453,20 +490,29 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
     }
 
     @Override
-    public void onJobScheduled(Context context, Job job) {
+    public void onJobScheduled(Context context, final Job job) {
 
-        if (job != null) {
-
-            String campaignId = job.getJobCampaignId();
-            String clientId = job.getJobClientId();
-
-            String type = job.getPeriodicTaskTag();
-            if (type.equals(Preferences.CAMPAIGN_SCHEDULE)) {
-                getScheduleChannelInfo(clientId, campaignId);
-            } else {
-                createCampaignPlayer(campaignId);
+        PlayerActivity.this.runOnUiThread(new Runnable() {
+            public void run() {
+                navigateToScheduleScreen(job);
             }
 
+        });
+
+    }
+
+    private void navigateToScheduleScreen(final Job job) {
+
+        if (job != null) {
+            String campaignId = job.getJobCampaignId();
+            String clientId = job.getJobClientId();
+            String type = job.getPeriodicTaskTag();
+            if (type.equals(Preferences.CAMPAIGN_SCHEDULE) &&
+                    !campaignDB.isCampaignDataAvailable(campaignId)) {
+                playLiveData = true;
+                getScheduleChannelInfo(clientId, campaignId);
+            } else
+                createCampaignPlayer(campaignId);
         }
     }
 
