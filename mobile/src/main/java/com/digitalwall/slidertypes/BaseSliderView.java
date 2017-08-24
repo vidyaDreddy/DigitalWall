@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -134,11 +135,17 @@ public abstract class BaseSliderView {
             fl_video.setVisibility(View.VISIBLE);
 
             try {
+               /* String fileName = "android.resource://" + getContext().getPackageName() + "/raw/sample";
+                tv_video.setVideoURI(Uri.parse(fileName));*/
+
                 tv_video.setVisibility(View.VISIBLE);
                 tv_video.requestFocus();
-                String fileName = "android.resource://" + getContext().getPackageName() + "/raw/sample";
-                //tv_video.setVideoURI(Uri.parse("http://techslides.com/demos/sample-videos/small.mp4"));
-                tv_video.setVideoURI(Uri.parse(fileName));
+                //tv_video.setVideoURI(Uri.parse(mUrl));
+                /*if (mFile != null) {
+                    tv_video.setVideoPath("file:///"+mFile.toString());
+                }else{
+                    tv_video.setVideoURI(Uri.parse(mUrl));
+                }*/
                 tv_video.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                     @Override
                     public void onPrepared(MediaPlayer mp) {

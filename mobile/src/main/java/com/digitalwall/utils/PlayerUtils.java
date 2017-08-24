@@ -85,35 +85,39 @@ public class PlayerUtils {
 
         /*ASSIGNING THE ASSETS TO THE CHANNEL*/
         final ArrayList<AssetsModel> mList = channel.getAssetsList();
-        for (int i = 0; i < mList.size(); i++) {
-            AssetsModel model = mList.get(i);
+        if(mList.size()>0) {
 
-            SlideView slide = new SlideView(parent, model);
-            slide.setSlideType(model.getAssetType());
-            slide.setPicasso(Picasso.with(parent));
-            slide.image(model.getAssetUrl());
+            for (int i = 0; i < mList.size(); i++) {
+                AssetsModel model = mList.get(i);
 
-            if (!Utils.isValueNullOrEmpty(model.getAsset_local_url()))
-                slide.imageFile(new File(model.getAsset_local_url()));
+                SlideView slide = new SlideView(parent, model);
+                slide.setSlideType(model.getAssetType());
+                slide.setPicasso(Picasso.with(parent));
+                slide.image(model.getAssetUrl());
 
-            sl_layout.addSlider(slide);
+                if (!Utils.isValueNullOrEmpty(model.getAsset_local_url()))
 
+                    slide.imageFile(new File(model.getAsset_local_url()));
+                    sl_layout.addSlider(slide);
 
-            /*SET SLIDE DURATION AND ANIMATION TO THE  ONLY 1ST ASSET*/
-            if (mList.size() > 0) {
-                sl_layout.setDuration(mList.get(0).getAssetDuration());
+                /*SET SLIDE DURATION AND ANIMATION TO THE  ONLY 1ST ASSET*/
+                if (mList.size() > 0) {
+                    sl_layout.setDuration(mList.get(0).getAssetDuration());
 
-                JSONObject object = new JSONObject();
-                try {
-                    object.put("registrationID", parent.display_key);
-                    object.put("Message", "Hi");
-                    //parent.setDateToWebSocket(object.toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                    JSONObject object = new JSONObject();
+                    try {
+                        object.put("registrationID", parent.display_key);
+                        object.put("Message", "Hi");
+                        //parent.setDateToWebSocket(object.toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    //sl_layout.setPresetTransformer(mList.get(0).getAssetAnimation());
                 }
-                //sl_layout.setPresetTransformer(mList.get(0).getAssetAnimation());
             }
         }
+
+
 
 
         sl_layout.addOnPageChangeListener(new ViewPagerEx.OnPageChangeListener() {
