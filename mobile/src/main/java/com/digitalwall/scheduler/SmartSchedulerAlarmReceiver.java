@@ -3,6 +3,7 @@ package com.digitalwall.scheduler;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 /**
  * Created by piyush
@@ -14,6 +15,7 @@ public class SmartSchedulerAlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Intent onAlarmReceiverServiceIntent = new Intent(context, SmartSchedulerAlarmReceiverService.class);
+        Log.d("intent","........"+intent.getExtras());
         onAlarmReceiverServiceIntent.putExtras(intent.getExtras());
         context.startService(onAlarmReceiverServiceIntent);
     }

@@ -30,6 +30,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL(DBConstants.CREATE_TABLE_CAMPAIGN);
         db.execSQL(DBConstants.CREATE_TABLE_CHANNEL);
         db.execSQL(DBConstants.CREATE_TABLE_ASSET);
+        db.execSQL(DBConstants.CREATE_TABLE_SCHEDULES);
         Log.v("GeolyticsSDK", "Creating the Database");
     }
 

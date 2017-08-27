@@ -45,7 +45,7 @@ public class ScheduleDateModel {
         String[] TimeStr = time.split(":");
         int hour = Integer.parseInt(TimeStr[0]);
         int minute = Integer.parseInt(TimeStr[1]);
-        int sec = Integer.parseInt(TimeStr[2]);
+        int sec = 0;//Integer.parseInt(TimeStr[2]);
 
         cal.set(Calendar.YEAR, year);
         cal.set(Calendar.MONTH, month - 1);
