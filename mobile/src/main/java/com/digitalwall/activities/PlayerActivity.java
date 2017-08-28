@@ -519,6 +519,8 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
                 if (!campaignDB.isCampaignDataAvailable(campaignId)) {
                     playLiveData = true;
                     getScheduleChannelInfo(clientId, campaignId);
+                }else{
+                    createCampaignPlayer(campaignId);
                 }
             }
         }
