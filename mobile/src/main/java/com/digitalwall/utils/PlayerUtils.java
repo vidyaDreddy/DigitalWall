@@ -85,7 +85,7 @@ public class PlayerUtils {
 
         /*ASSIGNING THE ASSETS TO THE CHANNEL*/
         final ArrayList<AssetsModel> mList = channel.getAssetsList();
-        if(mList.size()>0) {
+        if(mList!=null&&mList.size()>0) {
 
             for (int i = 0; i < mList.size(); i++) {
                 AssetsModel model = mList.get(i);

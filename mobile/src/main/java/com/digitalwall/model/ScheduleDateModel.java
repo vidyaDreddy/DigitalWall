@@ -1,5 +1,7 @@
 package com.digitalwall.model;
 
+import com.digitalwall.utils.DeviceInfo;
+
 import org.json.JSONObject;
 
 import java.util.Calendar;
@@ -14,10 +16,14 @@ public class ScheduleDateModel {
     private Calendar sDate;
     private Calendar eDate;
     private String dType;
+    private int jonId;
+    private int jonIdEnd;
 
     public ScheduleDateModel(JSONObject jsonObject) {
 
         /*END DATE*/
+        int sJobId = DeviceInfo.randomJobId();
+        setJonId(sJobId);
         String eDate = jsonObject.optString("endDate");
         String eTime = jsonObject.optString("endTime");
         Calendar eCal = getCalendarDate(eDate, eTime);
@@ -82,5 +88,21 @@ public class ScheduleDateModel {
 
     public void setdType(String dType) {
         this.dType = dType;
+    }
+
+    public int getJonId() {
+        return jonId;
+    }
+
+    public void setJonId(int jonId) {
+        this.jonId = jonId;
+    }
+
+    public int getJonIdEnd() {
+        return jonIdEnd;
+    }
+
+    public void setJonIdEnd(int jonIdEnd) {
+        this.jonIdEnd = jonIdEnd;
     }
 }

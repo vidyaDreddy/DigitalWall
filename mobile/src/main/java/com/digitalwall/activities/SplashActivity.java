@@ -133,7 +133,6 @@ public class SplashActivity extends BaseActivity implements JSONResult {
 
             JSONObject jObject = (JSONObject) result;
             try {
-
                 String status = jObject.getString("status");
                 if (status.equalsIgnoreCase("success")) {
                     DeviceModel model = new DeviceModel(jObject);
@@ -141,7 +140,6 @@ public class SplashActivity extends BaseActivity implements JSONResult {
                             model.getDisplayKey());
                     navigateToDashBoard();
                 }
-
             } catch (JSONException e) {
                 e.printStackTrace();
             }
