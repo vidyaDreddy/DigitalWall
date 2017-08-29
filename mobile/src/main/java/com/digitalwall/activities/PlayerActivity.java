@@ -14,9 +14,11 @@ import com.digitalwall.R;
 import com.digitalwall.database.AssetsSource;
 import com.digitalwall.database.CampaignSource;
 import com.digitalwall.database.ChannelSource;
+import com.digitalwall.database.ScheduleSource;
 import com.digitalwall.model.AssetsModel;
 import com.digitalwall.model.CampaignModel;
 import com.digitalwall.model.ChannelModel;
+import com.digitalwall.model.ScheduleCampaignModel;
 import com.digitalwall.model.ScheduleDateModel;
 import com.digitalwall.model.ScheduleModel;
 import com.digitalwall.scheduler.Job;
@@ -33,6 +35,7 @@ import com.digitalwall.utils.Utils;
 import com.mixpanel.android.java_websocket.client.WebSocketClient;
 import com.mixpanel.android.java_websocket.handshake.ServerHandshake;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -61,6 +64,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
     private ProgressDialog progressBar;
 
     private CampaignSource campaignDB;
+    private ScheduleSource schedulesDB;
 
     private boolean playLiveData = false;
     private long currentSystemTime;
@@ -73,6 +77,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         campaignDB = new CampaignSource(this);
+        schedulesDB = new ScheduleSource(this);
 
         jobScheduler = SmartScheduler.getInstance(this);
 
@@ -83,6 +88,8 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
 
         display_key = ApiConfiguration.getAuthToken(this, ApiConfiguration.PREF_KEY_DISPLAY_ID);
 
+        Log.d("display_key","......."+ display_key);
+
         /*MAIN LAYOUT*/
         rl_main = (RelativeLayout) findViewById(R.id.rl_main);
         rl_main.setVisibility(View.GONE);
@@ -92,7 +99,17 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
         tv_display_key.setVisibility(View.GONE);
 
         /*CHECK FOR THE PLAYER INFO*/
-        autoCampaignId = Preferences.getStringSharedPref(this, Preferences.PREF_KEY_AUTO_CAMPAIGN_ID);
+
+        String currentCampaignId = schedulesDB.selectAll();
+
+        if(currentCampaignId.isEmpty()){
+            autoCampaignId = Preferences.getStringSharedPref(this, Preferences.PREF_KEY_AUTO_CAMPAIGN_ID);
+        }else{
+            autoCampaignId = currentCampaignId;
+        }
+
+        Log.d("autoCampaignId","......."+ autoCampaignId);
+
         if (!Utils.isValueNullOrEmpty(autoCampaignId)) {
             if (campaignDB.isCampaignDataAvailable(autoCampaignId)) {
                 createCampaignPlayer(autoCampaignId);
@@ -108,6 +125,11 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
         /*CONNECT WITH WEB SOCKET*/
         connectWithWebSocket(display_key);
 
+    }
+
+    private String getCurrentCampainId(){
+
+        return "";
     }
 
     private void connectWithWebSocket(String display_key) {
@@ -271,6 +293,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
 
         /*GET THE  AUTO CAMPAIGN INFO*/
         if (code == ApiConfiguration.GET_AUTO_CAMPAIGN_INFO_CODE) {
+            Log.d("...","...1 code here"+code);
             try {
                 JSONObject jObject = (JSONObject) result;
                 String status = jObject.optString("status");
@@ -292,10 +315,13 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
 
          /*GET THE SCHEDULE CAMPAIGN INFO*/
         if (code == ApiConfiguration.GET_SCHEDULE_INFO_CODE) {
+            Log.d("...","...2 code here"+code);
             try {
                 JSONObject jObject = (JSONObject) result;
+                Log.d("...","...2 code here"+jObject);
                 String status = jObject.optString("status");
                 if (status.equalsIgnoreCase("success")) {
+                    prepareSchedulesToSave(jObject);
                     ScheduleModel model = new ScheduleModel(jObject);
                     initilizeScheduleCampaign(model);
                 }
@@ -306,8 +332,10 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
 
          /*GET THE  CAMPAIGN INFO*/
         if (code == ApiConfiguration.GET_CAMPAIGN_INFO_CODE) {
+            Log.d("...","...3 code here"+code);
             try {
                 JSONObject jObject = (JSONObject) result;
+                Log.d("...","...3 code here"+jObject);
                 String status = jObject.optString("status");
                 if (status.equalsIgnoreCase("success")) {
                     CampaignModel model = new CampaignModel(jObject);
@@ -323,6 +351,28 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
             }
         }
 
+
+    }
+
+    private void prepareSchedulesToSave(JSONObject jObject){
+        String id = jObject.optString("_id");
+        String cmpId = jObject.optString("campaignId");
+        ScheduleCampaignModel model;
+        try {
+            JSONArray array = jObject.getJSONArray("schedules");
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject jsonObject = array.getJSONObject(i);
+                model = new ScheduleCampaignModel(jsonObject);
+                model.setId(id);
+                model.setCampaignId(cmpId);
+                schedulesDB.insertData(model);
+            }
+
+            Log.d("working.......","working");
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
     }
 
