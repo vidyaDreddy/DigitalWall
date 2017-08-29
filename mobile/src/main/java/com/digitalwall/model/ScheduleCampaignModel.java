@@ -18,6 +18,7 @@ public class ScheduleCampaignModel {
     private String endDate;
     private long startTime;
     private long endTime;
+    private int jobid;
 
     public String getStartDate() {
         return startDate;
@@ -67,9 +68,16 @@ public class ScheduleCampaignModel {
         this.id = id;
     }
 
+    public int getJobid() {
+        return jobid;
+    }
+
+    public void setJobid(int jobid) {
+        this.jobid = jobid;
+    }
+
     private String campaignId;
     private String id;
-
 
 
     public ScheduleCampaignModel(JSONObject object) throws JSONException {
@@ -91,16 +99,19 @@ public class ScheduleCampaignModel {
 
         if (object.has("campaignId"))
             setCampaignId(object.getString("campaignId"));
+
+        if (object.has("jobId"))
+            setJobid(object.getInt("jobId"));
     }
 
-    public long convertTimeToSeconds(String h){
-        String[] h1=h.split(":");
-        int hour=Integer.parseInt(h1[0]);
-        int minute=Integer.parseInt(h1[1]);
-        int second=Integer.parseInt(h1[2]);
+    public long convertTimeToSeconds(String h) {
+        String[] h1 = h.split(":");
+        int hour = Integer.parseInt(h1[0]);
+        int minute = Integer.parseInt(h1[1]);
+        int second = Integer.parseInt(h1[2]);
         long temp;
         temp = second + (60 * minute) + (3600 * hour);
-        Log.d("long...","..."+temp);
+        Log.d("long...", "..." + temp);
         return temp;
     }
 }

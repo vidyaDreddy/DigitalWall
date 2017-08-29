@@ -14,6 +14,7 @@ import com.digitalwall.R;
 import com.digitalwall.database.AssetsSource;
 import com.digitalwall.database.CampaignSource;
 import com.digitalwall.database.ChannelSource;
+import com.digitalwall.database.ScheduleDb;
 import com.digitalwall.database.ScheduleSource;
 import com.digitalwall.model.AssetsModel;
 import com.digitalwall.model.CampaignModel;
@@ -89,7 +90,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
 
         display_key = ApiConfiguration.getAuthToken(this, ApiConfiguration.PREF_KEY_DISPLAY_ID);
         clientId = Preferences.getStringSharedPref(this, Preferences.PREF_KEY_CLIENT_ID);
-        autoCampaignId=Preferences.getStringSharedPref(this,Preferences.PREF_KEY_AUTO_CAMPAIGN_ID);
+        autoCampaignId = Preferences.getStringSharedPref(this, Preferences.PREF_KEY_AUTO_CAMPAIGN_ID);
 
         Log.d("display_key", "......." + display_key);
 
@@ -318,11 +319,16 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
                 Log.d("...", "...2 code here" + jObject);
                 String status = jObject.optString("status");
                 if (status.equalsIgnoreCase("success")) {
-                    prepareSchedulesToSave(jObject);
+                    /*prepareSchedulesToSave(jObject);
                     ScheduleModel model = new ScheduleModel(jObject);
-                    initilizeScheduleCampaign(model);
+                    initilizeScheduleCampaign(model);*/
+                    ArrayList<ScheduleCampaignModel> scheduleCampaignModels = getScheduleCampaignModelList(jObject);
+                    ScheduleDb scheduleDb = new ScheduleDb(this);
+                    for (int i = 0; i < scheduleCampaignModels.size(); i++) {
+                        scheduleDb.insertData(scheduleCampaignModels.get(i));
+                    }
                 }
-            } catch (JSONException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -349,6 +355,31 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
         }
 
 
+    }
+
+    private ArrayList<ScheduleCampaignModel> getScheduleCampaignModelList(JSONObject jsonObject) {
+
+        ArrayList<ScheduleCampaignModel> scheduleCampaignModels = new ArrayList<>();
+        JSONArray mScheduleJsonArray = jsonObject.optJSONArray("schedules");
+
+        for (int i = 0; i < mScheduleJsonArray.length(); i++) {
+            JSONObject mScheduleCampaignModelJson = mScheduleJsonArray.optJSONObject(i);
+            try {
+                mScheduleCampaignModelJson.put("_id", jsonObject.optString("_id"));
+                mScheduleCampaignModelJson.put("campaignId", jsonObject.optString("campaignId"));
+                mScheduleCampaignModelJson.put("jobId", DeviceInfo.randomJobId());
+                mScheduleCampaignModelJson.put("startDate", mScheduleCampaignModelJson.optString("startDate"));
+                mScheduleCampaignModelJson.put("endDate", mScheduleCampaignModelJson.optString("endDate"));
+                mScheduleCampaignModelJson.put("startTime", mScheduleCampaignModelJson.optString("startTime"));
+                mScheduleCampaignModelJson.put("endTime", mScheduleCampaignModelJson.optString("endTime"));
+                ScheduleCampaignModel scheduleCampaignModel = new ScheduleCampaignModel(mScheduleCampaignModelJson);
+
+                scheduleCampaignModels.add(scheduleCampaignModel);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return scheduleCampaignModels;
     }
 
     private void prepareSchedulesToSave(JSONObject jObject) {

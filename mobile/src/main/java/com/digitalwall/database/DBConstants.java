@@ -22,6 +22,7 @@ public class DBConstants {
     public static final String SCHEDULES_END_TIME = "schedules_end_time";
     public static final String SCHEDULES_CAMPAIGN_ID = "schedules_campaign_id";
     public static final String SCHEDULES_ID = "schedules_id";
+    public static final String SCHEDULES_JOB_ID = "schedules_job_id";
 
     public static final String CAMPAIGN_ID = "campaign_id";
     public static final String CAMPAIGN_NAME = "campaign_name";
