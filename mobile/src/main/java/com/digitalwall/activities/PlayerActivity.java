@@ -15,18 +15,16 @@ import com.digitalwall.database.AssetsSource;
 import com.digitalwall.database.CampaignSource;
 import com.digitalwall.database.ChannelSource;
 import com.digitalwall.database.ScheduleDb;
-import com.digitalwall.database.ScheduleSource;
 import com.digitalwall.model.AssetsModel;
 import com.digitalwall.model.CampaignModel;
 import com.digitalwall.model.ChannelModel;
-import com.digitalwall.model.ScheduleCampaignModel;
-import com.digitalwall.model.ScheduleDateModel;
 import com.digitalwall.model.ScheduleModel;
 import com.digitalwall.scheduler.Job;
 import com.digitalwall.scheduler.SmartScheduler;
 import com.digitalwall.services.ApiConfiguration;
 import com.digitalwall.services.JSONResult;
 import com.digitalwall.services.JSONTask;
+import com.digitalwall.utils.DateUtils;
 import com.digitalwall.utils.DeviceInfo;
 import com.digitalwall.utils.DownloadFileFromURL;
 import com.digitalwall.utils.DownloadScheFileTask;
@@ -66,10 +64,9 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
     private ProgressDialog progressBar;
 
     private CampaignSource campaignDB;
-    private ScheduleSource schedulesDB;
+    private ScheduleDb schedulesDB;
 
     private boolean playLiveData = false;
-    private long currentSystemTime;
 
 
     @Override
@@ -79,7 +76,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         campaignDB = new CampaignSource(this);
-        schedulesDB = new ScheduleSource(this);
+        schedulesDB = new ScheduleDb(this);
 
         jobScheduler = SmartScheduler.getInstance(this);
 
@@ -104,13 +101,13 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
 
         /*CHECK FOR THE PLAYER INFO*/
 
-        String currentCampaignId = schedulesDB.selectAll();
-        if (!Utils.isValueNullOrEmpty(currentCampaignId)) {
+        ScheduleModel scheduleModel = schedulesDB.getCurrentAviableCampaign();
+        if (scheduleModel != null) {
 
-            if (campaignDB.isCampaignDataAvailable(currentCampaignId))
-                createCampaignPlayer(currentCampaignId);
+            if (campaignDB.isCampaignDataAvailable(scheduleModel.getCampaignId()))
+                createCampaignPlayer(scheduleModel.getCampaignId());
             else
-                getScheduleChannelInfo(clientId, currentCampaignId);
+                getScheduleChannelInfo(clientId, scheduleModel.getCampaignId());
 
         } else if (!Utils.isValueNullOrEmpty(autoCampaignId)) {
 
@@ -313,22 +310,18 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
 
          /*GET THE SCHEDULE CAMPAIGN INFO*/
         if (code == ApiConfiguration.GET_SCHEDULE_INFO_CODE) {
-            Log.d("...", "...2 code here" + code);
             try {
                 JSONObject jObject = (JSONObject) result;
-                Log.d("...", "...2 code here" + jObject);
                 String status = jObject.optString("status");
                 if (status.equalsIgnoreCase("success")) {
-                    /*prepareSchedulesToSave(jObject);
-                    ScheduleModel model = new ScheduleModel(jObject);
-                    initilizeScheduleCampaign(model);*/
-                    ArrayList<ScheduleCampaignModel> scheduleCampaignModels = getScheduleCampaignModelList(jObject);
-                    ScheduleDb scheduleDb = new ScheduleDb(this);
-                    for (int i = 0; i < scheduleCampaignModels.size(); i++) {
-                        scheduleDb.insertData(scheduleCampaignModels.get(i));
+                    ArrayList<ScheduleModel> scheduleModels =
+                            getScheduleCampaignModelList(jObject);
+                    for (int i = 0; i < scheduleModels.size(); i++) {
+                        schedulesDB.insertData(scheduleModels.get(i));
                     }
+                    initilizeScheduleCampaign();
                 }
-            } catch (Exception e) {
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
@@ -357,85 +350,53 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
 
     }
 
-    private ArrayList<ScheduleCampaignModel> getScheduleCampaignModelList(JSONObject jsonObject) {
+    private ArrayList<ScheduleModel> getScheduleCampaignModelList(JSONObject jsonObject) throws JSONException {
 
-        ArrayList<ScheduleCampaignModel> scheduleCampaignModels = new ArrayList<>();
+        ArrayList<ScheduleModel> scheduleModels = new ArrayList<>();
         JSONArray mScheduleJsonArray = jsonObject.optJSONArray("schedules");
 
         for (int i = 0; i < mScheduleJsonArray.length(); i++) {
             JSONObject mScheduleCampaignModelJson = mScheduleJsonArray.optJSONObject(i);
-            try {
-                mScheduleCampaignModelJson.put("_id", jsonObject.optString("_id"));
-                mScheduleCampaignModelJson.put("campaignId", jsonObject.optString("campaignId"));
-                mScheduleCampaignModelJson.put("jobId", DeviceInfo.randomJobId());
-                mScheduleCampaignModelJson.put("startDate", mScheduleCampaignModelJson.optString("startDate"));
-                mScheduleCampaignModelJson.put("endDate", mScheduleCampaignModelJson.optString("endDate"));
-                mScheduleCampaignModelJson.put("startTime", mScheduleCampaignModelJson.optString("startTime"));
-                mScheduleCampaignModelJson.put("endTime", mScheduleCampaignModelJson.optString("endTime"));
-                ScheduleCampaignModel scheduleCampaignModel = new ScheduleCampaignModel(mScheduleCampaignModelJson);
 
-                scheduleCampaignModels.add(scheduleCampaignModel);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            mScheduleCampaignModelJson.put("_id", jsonObject.optString("_id"));
+            mScheduleCampaignModelJson.put("campaignId", jsonObject.optString("campaignId"));
+            mScheduleCampaignModelJson.put("jobId", DeviceInfo.randomJobId());
+            mScheduleCampaignModelJson.put("startDate", mScheduleCampaignModelJson.optString("startDate"));
+            mScheduleCampaignModelJson.put("endDate", mScheduleCampaignModelJson.optString("endDate"));
+            mScheduleCampaignModelJson.put("sTime", mScheduleCampaignModelJson.optString("startTime"));
+            mScheduleCampaignModelJson.put("eTime", mScheduleCampaignModelJson.optString("endTime"));
+            mScheduleCampaignModelJson.put("startTime", DateUtils.
+                    convertTimeToSeconds(mScheduleCampaignModelJson.optString("startTime")));
+            mScheduleCampaignModelJson.put("endTime", DateUtils.
+                    convertTimeToSeconds(mScheduleCampaignModelJson.optString("endTime")));
+
+            ScheduleModel scheduleModel = new ScheduleModel(mScheduleCampaignModelJson);
+
+            scheduleModels.add(scheduleModel);
+
         }
-        return scheduleCampaignModels;
-    }
-
-    private void prepareSchedulesToSave(JSONObject jObject) {
-        String id = jObject.optString("_id");
-        String cmpId = jObject.optString("campaignId");
-        ScheduleCampaignModel model;
-        try {
-            JSONArray array = jObject.getJSONArray("schedules");
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject jsonObject = array.getJSONObject(i);
-                model = new ScheduleCampaignModel(jsonObject);
-                model.setId(id);
-                model.setCampaignId(cmpId);
-                schedulesDB.insertData(model);
-            }
-
-            Log.d("working.......", "working");
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
+        return scheduleModels;
     }
 
 
-    private void initilizeScheduleCampaign(ScheduleModel model) {
+    private void initilizeScheduleCampaign() {
 
-        String campaignId = model.getScheduleCampaignId();
-        String clientId = model.getScheduleClientId();
+        ArrayList<ScheduleModel> mList = schedulesDB.getAllScheduleList();
 
-
-        /*DOWNLOAD AND SYNC THE SCHEDULE INFO*/
-        if (!campaignDB.isCampaignDataAvailable(campaignId)) {
-            playLiveData = false;
-            getScheduleChannelInfo(clientId, campaignId);
-        }
-
-
-        ArrayList<ScheduleDateModel> mList = model.getmScheduleList();
         for (int i = 0; i < mList.size(); i++) {
-            ScheduleDateModel date = mList.get(i);
 
-            /*SCHEDULE THE EVENT WITH START TIME*/
-            Calendar sCal = date.getsDate();
-            int sJobId = DeviceInfo.randomJobId();
-            setSchedulerPlayer(sJobId, campaignId, clientId,
+            ScheduleModel model = mList.get(i);
+            Calendar sCal = DateUtils.getCalendarDate(model.getStartDate(), model.getsTime());
+            setSchedulerPlayer(model.getJobid(), model.getCampaignId(), clientId,
                     Preferences.CAMPAIGN_SCHEDULE, sCal.getTimeInMillis());
-            currentSystemTime = System.currentTimeMillis();
 
-             /*SCHEDULE THE EVENT WITH END TIME*/
-            Calendar eCal = date.geteDate();
-            int eJobId = DeviceInfo.randomJobId();
+            //*SCHEDULE THE EVENT WITH END TIME*//*
+            Calendar eCal = DateUtils.getCalendarDate(model.getEndDate(), model.geteTime());
+            int eJobId = model.getJobid() + 12;
             setSchedulerPlayer(eJobId, autoCampaignId, clientId,
                     Preferences.CAMPAIGN_AUTO, eCal.getTimeInMillis());
-        }
 
+        }
     }
 
     private void saveScheduleCampaignData(CampaignModel model) {

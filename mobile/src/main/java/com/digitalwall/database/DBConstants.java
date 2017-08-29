@@ -20,6 +20,8 @@ public class DBConstants {
     public static final String SCHEDULES_END_DATE = "schedules_end_date";
     public static final String SCHEDULES_START_TIME = "schedules_start_time";
     public static final String SCHEDULES_END_TIME = "schedules_end_time";
+    public static final String SCHEDULES_S_TIME = "schedules_s_time";
+    public static final String SCHEDULES_E_TIME = "schedules_e_time";
     public static final String SCHEDULES_CAMPAIGN_ID = "schedules_campaign_id";
     public static final String SCHEDULES_ID = "schedules_id";
     public static final String SCHEDULES_JOB_ID = "schedules_job_id";
@@ -46,13 +48,20 @@ public class DBConstants {
     public static final String CHANNEL_VOLUME = "volume";
 
 
+
     /*In db version 11 added one fields in this table i.e. KEY_BRAND_LINK_REWRITE */
     public static final String CREATE_TABLE_SCHEDULES = "CREATE TABLE IF NOT EXISTS "
             + TABLE_SCHEDULES
             + "("
+            + SCHEDULES_JOB_ID
+            + " NUMBER, "
             + SCHEDULES_START_DATE
             + " TEXT, "
             + SCHEDULES_END_DATE
+            + " TEXT, "
+            + SCHEDULES_S_TIME
+            + " TEXT, "
+            + SCHEDULES_E_TIME
             + " TEXT, "
             + SCHEDULES_START_TIME
             + " NUMBER, "

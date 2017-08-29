@@ -7,8 +7,10 @@ import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 
+import com.digitalwall.activities.BaseActivity;
 import com.digitalwall.model.TileModel;
 import com.digitalwall.model.LayoutModel;
 import com.digitalwall.views.SliderLayout;
@@ -21,8 +23,18 @@ import java.util.ArrayList;
 
 public class Utils {
 
+    public static void hideStatusBar(BaseActivity activity) {
+        WindowManager.LayoutParams attrs = activity.getWindow().getAttributes();
+        attrs.flags &= ~WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        activity.getWindow().setAttributes(attrs);
+        activity.getWindow().clearFlags(
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+    }
 
-    /** Returns the consumer friendly device name */
+
+    /**
+     * Returns the consumer friendly device name
+     */
     public static String getDeviceName() {
         String manufacturer = Build.MANUFACTURER;
         String model = Build.MODEL;
@@ -125,12 +137,12 @@ public class Utils {
     }
 
 
-    public  static ArrayList<LayoutModel> getLayoutList(){
+    public static ArrayList<LayoutModel> getLayoutList() {
 
-        ArrayList<LayoutModel> list=new ArrayList<>();
+        ArrayList<LayoutModel> list = new ArrayList<>();
 
-        LayoutModel m1= new LayoutModel(12,"VIDYA",800,800,0,0, "#3F51B5",Utils.getAssetList());
-        LayoutModel m2= new LayoutModel(14,"VIDYA",400,400,800,0,"#FF4081",Utils.getAssetList1());
+        LayoutModel m1 = new LayoutModel(12, "VIDYA", 800, 800, 0, 0, "#3F51B5", Utils.getAssetList());
+        LayoutModel m2 = new LayoutModel(14, "VIDYA", 400, 400, 800, 0, "#FF4081", Utils.getAssetList1());
         list.add(m1);
         list.add(m2);
         return list;
@@ -138,27 +150,25 @@ public class Utils {
     }
 
 
+    public static ArrayList<TileModel> getAssetList() {
 
+        ArrayList<TileModel> list = new ArrayList<>();
 
-    public  static ArrayList<TileModel> getAssetList(){
-
-        ArrayList<TileModel> list=new ArrayList<>();
-
-        TileModel m1=new TileModel("Image","http://www.hdwallpapers.in/thumbs/2017/misako_be_kind_the_lego_ninjago_movie_2017-t2.jpg","1",6000,"Default");
-        TileModel m2=new TileModel("Image","http://tvfiles.alphacoders.com/100/hdclearart-10.png","1",4000,"Accordion");
-        TileModel m3=new TileModel("Image","https://wallpaperbrowse.com/media/" +
+        TileModel m1 = new TileModel("Image", "http://www.hdwallpapers.in/thumbs/2017/misako_be_kind_the_lego_ninjago_movie_2017-t2.jpg", "1", 6000, "Default");
+        TileModel m2 = new TileModel("Image", "http://tvfiles.alphacoders.com/100/hdclearart-10.png", "1", 4000, "Accordion");
+        TileModel m3 = new TileModel("Image", "https://wallpaperbrowse.com/media/" +
                 "images/Dubai-Photos-Images-Oicture-Dubai-Landmarks-800x600.jpg",
-                "1",2134,"Background2Foreground");
-        TileModel m4=new TileModel("Image","http://www.hdwallpapers.in/thumbs" +
-                "/2017/metal_vases_hd-t2.jpg","1",7000,"CubeIn");
-        TileModel m5=new TileModel("Image","http://www.hdwallpapers.in/thumbs" +
-                "/2009/real_artists_dont_make_wallpapers-t2.jpg","1",1000,"DepthPage");
-        TileModel m6=new TileModel("Image","http://www.hdwallpapers.in/" +
-                "thumbs/2015/android_marshmallow_6-t2.jpg","1",2134,"Fade");
-        TileModel m7=new TileModel("Image","http://www.hdwallpapers.in" +
-                "/thumbs/2009/green_abstract-t2.jpg","1",100,"FlipHorizontal");
-        TileModel m8=new TileModel("Image","http://www.hdwallpapers.in/" +
-                "thumbs/2016/paintwave_pink-t2.jpg","1",10000,"FlipPage");
+                "1", 2134, "Background2Foreground");
+        TileModel m4 = new TileModel("Image", "http://www.hdwallpapers.in/thumbs" +
+                "/2017/metal_vases_hd-t2.jpg", "1", 7000, "CubeIn");
+        TileModel m5 = new TileModel("Image", "http://www.hdwallpapers.in/thumbs" +
+                "/2009/real_artists_dont_make_wallpapers-t2.jpg", "1", 1000, "DepthPage");
+        TileModel m6 = new TileModel("Image", "http://www.hdwallpapers.in/" +
+                "thumbs/2015/android_marshmallow_6-t2.jpg", "1", 2134, "Fade");
+        TileModel m7 = new TileModel("Image", "http://www.hdwallpapers.in" +
+                "/thumbs/2009/green_abstract-t2.jpg", "1", 100, "FlipHorizontal");
+        TileModel m8 = new TileModel("Image", "http://www.hdwallpapers.in/" +
+                "thumbs/2016/paintwave_pink-t2.jpg", "1", 10000, "FlipPage");
 
         list.add(m1);
         list.add(m2);
@@ -175,19 +185,19 @@ public class Utils {
     }
 
 
-    public  static ArrayList<TileModel> getAssetList1(){
+    public static ArrayList<TileModel> getAssetList1() {
 
-        ArrayList<TileModel> list=new ArrayList<>();
+        ArrayList<TileModel> list = new ArrayList<>();
 
 
-        TileModel m5=new TileModel("Image","http://www.hdwallpapers.in/thumbs" +
-                "/2009/real_artists_dont_make_wallpapers-t2.jpg","1",1000,"DepthPage");
-        TileModel m6=new TileModel("Image","http://www.hdwallpapers.in/" +
-                "thumbs/2015/android_marshmallow_6-t2.jpg","1",2134,"Fade");
-        TileModel m7=new TileModel("Image","http://www.hdwallpapers.in" +
-                "/thumbs/2009/green_abstract-t2.jpg","1",100,"FlipHorizontal");
-        TileModel m8=new TileModel("Image","http://www.hdwallpapers.in/" +
-                "thumbs/2016/paintwave_pink-t2.jpg","1",10000,"FlipPage");
+        TileModel m5 = new TileModel("Image", "http://www.hdwallpapers.in/thumbs" +
+                "/2009/real_artists_dont_make_wallpapers-t2.jpg", "1", 1000, "DepthPage");
+        TileModel m6 = new TileModel("Image", "http://www.hdwallpapers.in/" +
+                "thumbs/2015/android_marshmallow_6-t2.jpg", "1", 2134, "Fade");
+        TileModel m7 = new TileModel("Image", "http://www.hdwallpapers.in" +
+                "/thumbs/2009/green_abstract-t2.jpg", "1", 100, "FlipHorizontal");
+        TileModel m8 = new TileModel("Image", "http://www.hdwallpapers.in/" +
+                "thumbs/2016/paintwave_pink-t2.jpg", "1", 10000, "FlipPage");
 
 
         list.add(m5);
@@ -201,58 +211,58 @@ public class Utils {
     }
 
 
-    public  static SliderLayout.Transformer getAnimation(String anim){
+    public static SliderLayout.Transformer getAnimation(String anim) {
         SliderLayout.Transformer mTransformer;
 
 
-        switch (anim){
+        switch (anim) {
             case "Accordion":
-                mTransformer=SliderLayout.Transformer.Accordion;
+                mTransformer = SliderLayout.Transformer.Accordion;
                 break;
             case "Background2Foreground":
-                mTransformer=SliderLayout.Transformer.Background2Foreground;
+                mTransformer = SliderLayout.Transformer.Background2Foreground;
                 break;
             case "CubeIn":
-                mTransformer=SliderLayout.Transformer.CubeIn;
+                mTransformer = SliderLayout.Transformer.CubeIn;
                 break;
             case "DepthPage":
-                mTransformer=SliderLayout.Transformer.DepthPage;
+                mTransformer = SliderLayout.Transformer.DepthPage;
                 break;
             case "Fade":
-                mTransformer=SliderLayout.Transformer.Fade;
+                mTransformer = SliderLayout.Transformer.Fade;
                 break;
             case "FlipHorizontal":
-                mTransformer=SliderLayout.Transformer.FlipHorizontal;
+                mTransformer = SliderLayout.Transformer.FlipHorizontal;
                 break;
             case "FlipPage":
-                mTransformer=SliderLayout.Transformer.FlipPage;
+                mTransformer = SliderLayout.Transformer.FlipPage;
                 break;
             case "Foreground2Background":
-                mTransformer=SliderLayout.Transformer.Foreground2Background;
+                mTransformer = SliderLayout.Transformer.Foreground2Background;
                 break;
             case "RotateDown":
-                mTransformer=SliderLayout.Transformer.RotateDown;
+                mTransformer = SliderLayout.Transformer.RotateDown;
                 break;
             case "RotateUp":
-                mTransformer=SliderLayout.Transformer.RotateUp;
+                mTransformer = SliderLayout.Transformer.RotateUp;
                 break;
             case "Stack":
-                mTransformer=SliderLayout.Transformer.Stack;
+                mTransformer = SliderLayout.Transformer.Stack;
                 break;
             case "Tablet":
-                mTransformer=SliderLayout.Transformer.Tablet;
+                mTransformer = SliderLayout.Transformer.Tablet;
                 break;
             case "ZoomIn":
-                mTransformer=SliderLayout.Transformer.ZoomIn;
+                mTransformer = SliderLayout.Transformer.ZoomIn;
                 break;
             case "ZoomOutSlide":
-                mTransformer=SliderLayout.Transformer.ZoomOutSlide;
+                mTransformer = SliderLayout.Transformer.ZoomOutSlide;
                 break;
             case "ZoomOut":
-                mTransformer=SliderLayout.Transformer.ZoomOut;
+                mTransformer = SliderLayout.Transformer.ZoomOut;
                 break;
             default:
-                mTransformer=SliderLayout.Transformer.Default;
+                mTransformer = SliderLayout.Transformer.Default;
                 break;
         }
 

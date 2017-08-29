@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.digitalwall.model.ScheduleCampaignModel;
+import com.digitalwall.model.ScheduleModel;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -46,7 +46,7 @@ public class ScheduleSource {
         }
     }
 
-    public long insertData(ScheduleCampaignModel model) {
+    public long insertData(ScheduleModel model) {
         long insertValue = -1;
 
         ContentValues values = new ContentValues();

@@ -6,16 +6,19 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.digitalwall.model.ScheduleCampaignModel;
+import com.digitalwall.model.ScheduleModel;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 /**
- * Created by Shankar on 8/26/2017.
+ * Created by Shankar
+ * on 8/26/2017.
  */
 
 public class ScheduleDb {
@@ -25,6 +28,8 @@ public class ScheduleDb {
     private String mColumns[] = {
             DBConstants.SCHEDULES_START_DATE,
             DBConstants.SCHEDULES_END_DATE,
+            DBConstants.SCHEDULES_S_TIME,
+            DBConstants.SCHEDULES_E_TIME,
             DBConstants.SCHEDULES_START_TIME,
             DBConstants.SCHEDULES_END_TIME,
             DBConstants.SCHEDULES_CAMPAIGN_ID,
@@ -50,12 +55,14 @@ public class ScheduleDb {
         }
     }
 
-    public long insertData(ScheduleCampaignModel model) {
+    public long insertData(ScheduleModel model) {
         long insertValue = -1;
 
         ContentValues values = new ContentValues();
         values.put(DBConstants.SCHEDULES_START_DATE, model.getStartDate());
         values.put(DBConstants.SCHEDULES_END_DATE, model.getEndDate());
+        values.put(DBConstants.SCHEDULES_S_TIME, model.getsTime());
+        values.put(DBConstants.SCHEDULES_E_TIME, model.geteTime());
         values.put(DBConstants.SCHEDULES_START_TIME, model.getStartTime());
         values.put(DBConstants.SCHEDULES_END_TIME, model.getEndTime());
         values.put(DBConstants.SCHEDULES_CAMPAIGN_ID, model.getCampaignId());
@@ -69,13 +76,57 @@ public class ScheduleDb {
         return insertValue;
     }
 
-    public ScheduleCampaignModel selectAll() {
+    public ArrayList<ScheduleModel> getAllScheduleList() {
 
-        ScheduleCampaignModel scheduleCampaignModel = null;
+
+        open();
+        Cursor cursor = mDatabase.query(DBConstants.TABLE_SCHEDULES, mColumns, null, null, null, null, null);
+
+        ArrayList<ScheduleModel> campaignList = new ArrayList<>();
+        if (cursor.getCount() > 0) {
+
+            while (cursor.moveToNext()) {
+                try {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("_id", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.SCHEDULES_ID)));
+                    jsonObject.put("startDate", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.SCHEDULES_START_DATE)));
+                    jsonObject.put("endDate", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.SCHEDULES_END_DATE)));
+                    jsonObject.put("startTime", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.SCHEDULES_START_TIME)));
+                    jsonObject.put("endTime", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.SCHEDULES_END_TIME)));
+                    jsonObject.put("sTime", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.SCHEDULES_S_TIME)));
+                    jsonObject.put("eTime", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.SCHEDULES_E_TIME)));
+                    jsonObject.put("campaignId", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.SCHEDULES_CAMPAIGN_ID)));
+                    jsonObject.put("jobId", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.SCHEDULES_JOB_ID)));
+
+                    ScheduleModel model = new ScheduleModel(jsonObject);
+                    campaignList.add(model);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        cursor.close();
+        close();
+        return campaignList;
+    }
+
+    public ScheduleModel getCurrentAviableCampaign() {
+
+        ScheduleModel scheduleModel = null;
         open();
 
         Date today = new Date();
-        SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String date = DATE_FORMAT.format(today);
         Log.d("currentDate", ",,,,,,,,," + date);
         long currentTime = (today.getSeconds() + (today.getMinutes() * 60) + (today.getHours() * 60 * 60));
@@ -96,10 +147,6 @@ public class ScheduleDb {
         if (cursor.getCount() > 0) {
 
             while (cursor.moveToNext()) {
-               /* Log.d("cursor campaignIDs","........."+cursor.getString(cursor.getColumnIndex(DBConstants.SCHEDULES_CAMPAIGN_ID)));
-                Log.d("cursor startdate","........."+cursor.getString(cursor.getColumnIndex(DBConstants.SCHEDULES_START_DATE)));
-                Log.d("cursor end  date","........."+cursor.getString(cursor.getColumnIndex(DBConstants.SCHEDULES_END_DATE)));
-                return cursor.getString(cursor.getColumnIndex(DBConstants.SCHEDULES_CAMPAIGN_ID));*/
                 try {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("_id", cursor.getString(cursor
@@ -108,6 +155,10 @@ public class ScheduleDb {
                             .getColumnIndex(DBConstants.SCHEDULES_START_DATE)));
                     jsonObject.put("endDate", cursor.getString(cursor
                             .getColumnIndex(DBConstants.SCHEDULES_END_DATE)));
+                    jsonObject.put("sTime", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.SCHEDULES_S_TIME)));
+                    jsonObject.put("eTime", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.SCHEDULES_E_TIME)));
                     jsonObject.put("startTime", cursor.getString(cursor
                             .getColumnIndex(DBConstants.SCHEDULES_START_TIME)));
                     jsonObject.put("endTime", cursor.getString(cursor
@@ -117,7 +168,7 @@ public class ScheduleDb {
                     jsonObject.put("jobId", cursor.getString(cursor
                             .getColumnIndex(DBConstants.SCHEDULES_JOB_ID)));
 
-                    scheduleCampaignModel = new ScheduleCampaignModel(jsonObject);
+                    scheduleModel = new ScheduleModel(jsonObject);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -129,26 +180,19 @@ public class ScheduleDb {
 
         cursor.close();
         close();
-        return scheduleCampaignModel;
+        return scheduleModel;
     }
 
-    public int deleteRecordById(String schedules_id) {
-        int deleteValue = -1;
-        open();
-        deleteValue = mDatabase.delete(DBConstants.TABLE_SCHEDULES, DBConstants.SCHEDULES_ID + " = ?",
-                new String[]{"" + schedules_id});
-        close();
-        return deleteValue;
-    }
 
-    /* Update brands depends on brand name */
-    public int updateSechdleDateData(ScheduleCampaignModel model) {
+    public int updateScheduleData(ScheduleModel model) {
 
         int updateValue = -1;
         ContentValues values = new ContentValues();
 
         values.put(DBConstants.SCHEDULES_START_DATE, model.getStartDate());
         values.put(DBConstants.SCHEDULES_END_DATE, model.getEndDate());
+        values.put(DBConstants.SCHEDULES_S_TIME, model.getsTime());
+        values.put(DBConstants.SCHEDULES_E_TIME, model.geteTime());
         values.put(DBConstants.SCHEDULES_START_TIME, model.getStartTime());
         values.put(DBConstants.SCHEDULES_END_TIME, model.getEndTime());
         values.put(DBConstants.SCHEDULES_CAMPAIGN_ID, model.getCampaignId());
@@ -163,8 +207,16 @@ public class ScheduleDb {
         return updateValue;
     }
 
+    public int deleteScheduleById(String schedules_id) {
+        int deleteValue = -1;
+        open();
+        deleteValue = mDatabase.delete(DBConstants.TABLE_SCHEDULES, DBConstants.SCHEDULES_ID + " = ?",
+                new String[]{"" + schedules_id});
+        close();
+        return deleteValue;
+    }
 
-    public int deleteAll() {
+    public int deleteAllSchedules() {
         int deleteValue = -1;
         open();
         deleteValue = mDatabase.delete(DBConstants.TABLE_SCHEDULES, null, null);

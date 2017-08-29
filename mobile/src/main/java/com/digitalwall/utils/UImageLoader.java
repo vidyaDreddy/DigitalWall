@@ -22,25 +22,7 @@ import java.io.File;
 public class UImageLoader {
 
 
-    public static void URLPicLoading(ImageView ivImageView, String ImageUrl, int placeholder) {
-
-        DisplayImageOptions options = new DisplayImageOptions.Builder()
-                .showImageForEmptyUri(placeholder)
-                .showImageOnFail(placeholder)
-                .cacheInMemory(true)
-                .cacheOnDisk(true)
-                .displayer(new FadeInBitmapDisplayer(300))
-                .considerExifParams(true)
-                .bitmapConfig(Bitmap.Config.ARGB_8888)
-                .build();
-
-        ImageLoader.getInstance().displayImage(ImageUrl, ivImageView, options);
-    }
-
     public static void URLPicLoadingFile(ImageView ivImageView, String fileUrl, int placeholder) {
-        fileUrl = fileUrl.replace(" ", "%20");
-
-        String decodedImgUri = Uri.fromFile(new File(fileUrl)).toString();
 
         DisplayImageOptions options = new DisplayImageOptions.Builder()
                 .showImageForEmptyUri(placeholder)
@@ -52,7 +34,8 @@ public class UImageLoader {
                 .bitmapConfig(Bitmap.Config.ARGB_8888)
                 .build();
 
-        ImageLoader.getInstance().displayImage(decodedImgUri, ivImageView, options);
+        ImageLoader.getInstance().displayImage(fileUrl, ivImageView, options);
     }
+
 
 }
