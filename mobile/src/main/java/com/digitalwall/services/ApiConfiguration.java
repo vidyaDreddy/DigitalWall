@@ -41,6 +41,9 @@ public class ApiConfiguration {
     public static final String GET_SCHEDULE_INFO = BASE_SERVER_URL + "schedule/%s";
     public static final int GET_SCHEDULE_INFO_CODE = 4;
 
+    public static final String GET_UPDATE_SCHEDULE_INFO = BASE_SERVER_URL + "schedule/%s";
+    public static final int GET_UPDATE_SCHEDULE_INFO_CODE = 5;
+
 
     public static void setAuthToken(Context context, String key, String value) {
         try {

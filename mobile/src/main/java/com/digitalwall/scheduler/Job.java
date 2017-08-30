@@ -15,6 +15,7 @@ public class Job {
     private final int jobId;
     private final int jobType;
     private final String jobCampaignId;
+    private final String jobScheduleId;
     private final String jobClientId;
     private final SmartScheduler.JobScheduledCallback jobScheduledCallback;
     private final String periodicTaskTag;
@@ -106,6 +107,9 @@ public class Job {
     public String getJobClientId() {
         return jobClientId;
     }
+    public String getJobScheduleId() {
+        return jobScheduleId;
+    }
 
 
     /**
@@ -191,6 +195,7 @@ public class Job {
         jobType = b.mJobType;
         jobCampaignId = b.mJobCampaignId;
         jobClientId = b.mJobClientId;
+        jobScheduleId=b.mJobScheduleId;
         jobScheduledCallback = b.mJobScheduledCallback;
         periodicTaskTag = b.mPeriodicTaskTag;
         requireCharging = b.mRequiresCharging;
@@ -208,6 +213,8 @@ public class Job {
         private int mJobId;
         private String mJobCampaignId;
         private String mJobClientId;
+        private String mJobScheduleId;
+
         private int mJobType = Job.Type.JOB_TYPE_NONE;
         private SmartScheduler.JobScheduledCallback mJobScheduledCallback;
 
@@ -237,12 +244,13 @@ public class Job {
          * @param periodicTaskTag      Tag for the PeriodicTask to be set for PeriodicTask type jobs.
          */
         public Builder(int jobId, String jobCampaignId, SmartScheduler.JobScheduledCallback jobScheduledCallback,
-                       @Nullable String periodicTaskTag, String jobClientId) {
+                       @Nullable String periodicTaskTag, String jobClientId,String jobScheId) {
             mJobScheduledCallback = jobScheduledCallback;
             mPeriodicTaskTag = periodicTaskTag;
             mJobType = Type.JOB_TYPE_ALARM;
             mJobCampaignId = jobCampaignId;
             mJobClientId = jobClientId;
+            mJobScheduleId=jobScheId;
             mJobId = jobId;
         }
 

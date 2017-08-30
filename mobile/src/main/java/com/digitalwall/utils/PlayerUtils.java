@@ -85,7 +85,7 @@ public class PlayerUtils {
 
         /*ASSIGNING THE ASSETS TO THE CHANNEL*/
         final ArrayList<AssetsModel> mList = channel.getAssetsList();
-        if(mList!=null&&mList.size()>0) {
+        if (mList != null && mList.size() > 0) {
 
             for (int i = 0; i < mList.size(); i++) {
                 AssetsModel model = mList.get(i);
@@ -96,11 +96,10 @@ public class PlayerUtils {
                 slide.image(model.getAssetUrl());
 
                 if (!Utils.isValueNullOrEmpty(model.getAsset_local_url()))
-
                     slide.imageFile(new File(model.getAsset_local_url()));
-                    sl_layout.addSlider(slide);
+                sl_layout.addSlider(slide);
 
-                /*SET SLIDE DURATION AND ANIMATION TO THE  ONLY 1ST ASSET*/
+                /*SET SLIDE DURATION AND ANIMATION TO THE  ONLY 1ST ASSET*//*
                 if (mList.size() > 0) {
                     sl_layout.setDuration(mList.get(0).getAssetDuration());
 
@@ -113,11 +112,9 @@ public class PlayerUtils {
                         e.printStackTrace();
                     }
                     //sl_layout.setPresetTransformer(mList.get(0).getAssetAnimation());
-                }
+                }*/
             }
         }
-
-
 
 
         sl_layout.addOnPageChangeListener(new ViewPagerEx.OnPageChangeListener() {
