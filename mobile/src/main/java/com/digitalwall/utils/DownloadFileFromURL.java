@@ -5,19 +5,18 @@ import android.os.Environment;
 import android.util.Log;
 
 import com.digitalwall.activities.BaseActivity;
-import com.digitalwall.activities.PlayerActivity;
 import com.digitalwall.database.AssetsSource;
-import com.digitalwall.database.ChannelSource;
 import com.digitalwall.model.AssetsModel;
+import com.digitalwall.services.DownloadResult;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Date;
 
 /**
  * Created by vidhayadhar
@@ -30,9 +29,12 @@ public class DownloadFileFromURL extends AsyncTask<String, String, String> {
     private BaseActivity parent;
     private AssetsModel model;
 
-    public DownloadFileFromURL(BaseActivity parent, AssetsModel model) {
-        this.parent = parent;
+    private WeakReference<DownloadResult> WEAK_JSON_RESULT;
+
+    public DownloadFileFromURL(BaseActivity parent, DownloadResult result, AssetsModel model) {
+        this.WEAK_JSON_RESULT = new WeakReference<>(result);
         this.model = model;
+        this.parent = parent;
     }
 
 
@@ -47,7 +49,14 @@ public class DownloadFileFromURL extends AsyncTask<String, String, String> {
             connection.connect();
             int lenghtOfFile = connection.getContentLength();
 
+
             InputStream input = new BufferedInputStream(url.openStream(), 8192);
+
+
+
+
+           /* String filePath = DownloadUtils.cleanFilePath(DownloadUtils.
+                    generateFilePath(model.getAssetUrl(), fileName));*/
 
             File home1 = new File(Environment.getExternalStorageDirectory() + "/" + "DigitalWall");
             if (!home1.exists()) {
@@ -61,8 +70,11 @@ public class DownloadFileFromURL extends AsyncTask<String, String, String> {
             else
                 type = ".mp4";
 
-            String filenameOutput = model.getAssetId() + "_" + new Date() + type;
-            file = new File(home1, filenameOutput);
+            //String filenameOutput = model.getAssetId() + "_" + new Date() + type;
+            String fileName = DownloadUtils.getAutoCampaignFilePathNew(model.getAssetUrl());
+            file = new File(home1, fileName);
+
+
             OutputStream output = new FileOutputStream(file);
             byte data[] = new byte[1024];
             long total = 0;
@@ -83,6 +95,15 @@ public class DownloadFileFromURL extends AsyncTask<String, String, String> {
 
     @Override
     protected void onPostExecute(String file_url) {
+
         Log.v("DOWNLOADED", "URL PATH" + file_url);
+
+        DownloadResult activity = WEAK_JSON_RESULT.get();
+        if (activity != null)
+            activity.successDownload(file_url);
+
+        model.setAsset_local_url(file_url);
+        AssetsSource assetsSource = new AssetsSource(parent);
+        assetsSource.insertData(model);
     }
 }

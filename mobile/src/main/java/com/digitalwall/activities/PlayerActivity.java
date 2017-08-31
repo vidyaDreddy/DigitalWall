@@ -22,10 +22,12 @@ import com.digitalwall.model.ScheduleModel;
 import com.digitalwall.scheduler.Job;
 import com.digitalwall.scheduler.SmartScheduler;
 import com.digitalwall.services.ApiConfiguration;
+import com.digitalwall.services.DownloadResult;
 import com.digitalwall.services.JSONResult;
 import com.digitalwall.services.JSONTask;
 import com.digitalwall.utils.DateUtils;
 import com.digitalwall.utils.DeviceInfo;
+import com.digitalwall.utils.DownloadFileFromURL;
 import com.digitalwall.utils.DownloadScheFileTask;
 import com.digitalwall.utils.DownloadUtils;
 import com.digitalwall.utils.PlayerUtils;
@@ -51,7 +53,7 @@ import java.util.List;
 @SuppressWarnings("deprecation")
 @SuppressLint("SetTextI18n")
 public class PlayerActivity extends BaseActivity implements JSONResult,
-        SmartScheduler.JobScheduledCallback, FetchListener {
+        SmartScheduler.JobScheduledCallback, FetchListener, DownloadResult {
 
     private JSONTask getChannelListInfo;
 
@@ -440,6 +442,8 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
             ScheduleModel model = mList.get(i);
             scheduleACampaign(model);
         }
+
+
     }
 
 
@@ -456,6 +460,8 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
                 Preferences.CAMPAIGN_AUTO, eCal.getTimeInMillis(), model.getId());
     }
 
+    private ArrayList<AssetsModel> mAssetList;
+
     private void saveScheduleCampaignData(CampaignModel model) {
         downloadAutoCampaign = false;
 
@@ -468,7 +474,6 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
                 channelDB.insertData(channelModel, model.getCampaignId());
                 if (channelModel.getAssetsList().size() > 0)
                     enqueueDownloads(channelModel.getAssetsList(), channelModel.getChannelId());
-
             }
         }
     }
@@ -484,6 +489,18 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
             for (int i = 0; i < model.getChannelList().size(); i++) {
                 ChannelModel channelModel = model.getChannelList().get(i);
                 channelDB.insertData(channelModel, model.getCampaignId());
+                /*mAssetList = channelModel.getAssetsList();
+                if (mAssetList.size() > 0) {
+                    for (int j = 0; j < mAssetList.size(); j++) {
+                        AssetsModel asset = mAssetList.get(j);
+                        String type = asset.getAssetType();
+                        if (type.equals("video"))
+                            asset.setAssetUrl("https://www.rmp-streaming.com/media/bbb-360p.mp4");
+                        asset.setChannel_id(channelModel.getChannelId());
+                        new DownloadFileFromURL(PlayerActivity.this, this, asset).execute();
+                    }
+                }*/
+
                 if (channelModel.getAssetsList().size() > 0)
                     enqueueDownloads(channelModel.getAssetsList(), channelModel.getChannelId());
 
@@ -633,6 +650,26 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
             }
         }
 
+    }
 
+    @Override
+    public void successDownload(String result) {
+        count++;
+
+        if (mAssetList.size() > 0) {
+            float per = (count / mAssetList.size()) * 100;
+            if (per < 100)
+                Log.v("DOWNLOAD", " DOWNLOADED [" + count + "/" + mAssetList.size() + "]");
+            else {
+                Log.v("DOWNLOAD", " DOWNLOAD COMPLETED");
+
+                if (downloadAutoCampaign) {
+                    createCampaignPlayer(autoCampaignId);
+                    if (progressBar.isShowing()) {
+                        progressBar.dismiss();
+                    }
+                }
+            }
+        }
     }
 }

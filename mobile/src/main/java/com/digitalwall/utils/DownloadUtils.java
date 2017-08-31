@@ -25,9 +25,9 @@ public class DownloadUtils {
         List<Request> requests = new ArrayList<>();
         for (AssetsModel model : mList) {
 
-           /* String type = model.getAssetType();
+            String type = model.getAssetType();
             if (type.equals("video"))
-                model.setAssetUrl("https://www.rmp-streaming.com/media/bbb-360p.mp4");*/
+                model.setAssetUrl("https://www.rmp-streaming.com/media/bbb-360p.mp4");
             String file_url;
             if (autoCampaign)
                 file_url = getAutoCampaignFilePath(model.getAssetUrl());
@@ -46,7 +46,7 @@ public class DownloadUtils {
         return requests;
     }
 
-    private static String getAutoCampaignFilePath(String url) {
+    public static String getAutoCampaignFilePath(String url) {
 
         Uri uri = Uri.parse(url);
         String extension = url.substring(url.lastIndexOf("."));
@@ -55,7 +55,7 @@ public class DownloadUtils {
         return (dir + "/Auto/" + System.nanoTime() + "_" + fileName);
     }
 
-    private static String getCampaignFilePath(String url) {
+    public static String getCampaignFilePath(String url) {
 
         Uri uri = Uri.parse(url);
         String extension = url.substring(url.lastIndexOf("."));
@@ -64,9 +64,19 @@ public class DownloadUtils {
         return (dir + "/Campaign/" + System.nanoTime() + "_" + fileName);
     }
 
-    private static String getSaveDir() {
+    public static String getSaveDir() {
         return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                 .toString() + "/Digiwall";
     }
+
+
+    public static String getAutoCampaignFilePathNew(String url) {
+
+        Uri uri = Uri.parse(url);
+        String extension = url.substring(url.lastIndexOf("."));
+        String fileName = uri.getLastPathSegment() + extension;
+        return (System.nanoTime() + "_" + fileName);
+    }
+
 
 }
