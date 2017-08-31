@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -27,13 +26,16 @@ import com.digitalwall.services.JSONResult;
 import com.digitalwall.services.JSONTask;
 import com.digitalwall.utils.DateUtils;
 import com.digitalwall.utils.DeviceInfo;
-import com.digitalwall.utils.DownloadFileFromURL;
 import com.digitalwall.utils.DownloadScheFileTask;
+import com.digitalwall.utils.DownloadUtils;
 import com.digitalwall.utils.PlayerUtils;
 import com.digitalwall.utils.Preferences;
 import com.digitalwall.utils.Utils;
 import com.mixpanel.android.java_websocket.client.WebSocketClient;
 import com.mixpanel.android.java_websocket.handshake.ServerHandshake;
+import com.tonyodev.fetch.Fetch;
+import com.tonyodev.fetch.listener.FetchListener;
+import com.tonyodev.fetch.request.Request;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,12 +45,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.concurrent.ExecutionException;
+import java.util.List;
 
 
 @SuppressWarnings("deprecation")
 @SuppressLint("SetTextI18n")
-public class PlayerActivity extends BaseActivity implements JSONResult, SmartScheduler.JobScheduledCallback {
+public class PlayerActivity extends BaseActivity implements JSONResult,
+        SmartScheduler.JobScheduledCallback, FetchListener {
 
     private JSONTask getChannelListInfo;
 
@@ -68,6 +71,12 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
     private ScheduleDb schedulesDB;
 
     private boolean playLiveData = false;
+    private int count;
+    private List<Request> requests = new ArrayList<>();
+
+    private Fetch fetch;
+
+    private boolean downloadAutoCampaign;
 
 
     @Override
@@ -76,13 +85,17 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
         setContentView(R.layout.activity_slide);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        fetch = Fetch.newInstance(this);
+        fetch.setAllowedNetwork(Fetch.NETWORK_ALL);
+        fetch.addFetchListener(this);
+
         campaignDB = new CampaignSource(this);
         schedulesDB = new ScheduleDb(this);
 
         jobScheduler = SmartScheduler.getInstance(this);
 
         progressBar = new ProgressDialog(this);
-        progressBar.setCancelable(true);
+        progressBar.setCancelable(false);
         progressBar.setMessage("Please wait player is configuring.");
         progressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 
@@ -105,19 +118,16 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
         final ScheduleModel scheduleModel = schedulesDB.getCurrentAviableCampaign();
         if (scheduleModel != null) {
 
-           /* if (campaignDB.isCampaignDataAvailable(autoCampaignId))
-                createCampaignPlayer(autoCampaignId);
-            else
-                getAutoCampaignChannelInfo(autoCampaignId);*/
+            createCampaignPlayer(autoCampaignId);
+            scheduleACampaign(scheduleModel);
 
-
-
-            if (campaignDB.isCampaignDataAvailable(scheduleModel.getCampaignId()))
+            /*if (campaignDB.isCampaignDataAvailable(scheduleModel.getCampaignId()))
                 createCampaignPlayer(scheduleModel.getCampaignId());
             else {
+
                 playLiveData = true;
                 getScheduleChannelInfo(clientId, scheduleModel.getCampaignId());
-            }
+            }*/
 
         } else if (!Utils.isValueNullOrEmpty(autoCampaignId)) {
 
@@ -163,6 +173,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
                                 break;
                             case "SCHEDULECREATED":
                                 configureScheduleCampaignPlayer(jObject);
+                                playLiveData = false;
                                 break;
                             case "SCHEDULEDELETED":
                                 deleteAScheduleCampaign(jObject);
@@ -198,7 +209,6 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
     private void deleteAScheduleCampaign(JSONObject jObject) throws JSONException {
 
         String scheduleId = jObject.getString("scheduleID");
-
 
         /*DELETE A CAMPAIGN*/
         deleteScheduleByScheduleId(scheduleId);
@@ -379,10 +389,9 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
                 String status = jObject.optString("status");
                 if (status.equalsIgnoreCase("success")) {
                     CampaignModel model = new CampaignModel(jObject);
-
-                    if (playLiveData)
+                    if (playLiveData) {
                         PlayerUtils.setLiveData(PlayerActivity.this, rl_main, model);
-                    else
+                    } else
                         saveScheduleCampaignData(model);
 
                 }
@@ -436,7 +445,6 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
 
     private void scheduleACampaign(ScheduleModel model) {
 
-
         Calendar sCal = DateUtils.getCalendarDate(model.getStartDate(), model.getsTime());
         setSchedulerPlayer(model.getJobid(), model.getCampaignId(), clientId,
                 Preferences.CAMPAIGN_SCHEDULE, sCal.getTimeInMillis(), model.getId());
@@ -449,77 +457,38 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
     }
 
     private void saveScheduleCampaignData(CampaignModel model) {
+        downloadAutoCampaign = false;
 
         campaignDB.insertData(model);
-
         if (model.getChannelList().size() > 0) {
             ChannelSource channelDB = new ChannelSource(this);
 
             for (int i = 0; i < model.getChannelList().size(); i++) {
                 ChannelModel channelModel = model.getChannelList().get(i);
                 channelDB.insertData(channelModel, model.getCampaignId());
+                if (channelModel.getAssetsList().size() > 0)
+                    enqueueDownloads(channelModel.getAssetsList(), channelModel.getChannelId());
 
-                if (channelModel.getAssetsList().size() > 0) {
-                    for (int j = 0; j < channelModel.getAssetsList().size(); j++) {
-                        AssetsModel asset = channelModel.getAssetsList().get(j);
-                        asset.setChannel_id(channelModel.getChannelId());
-                        new DownloadScheFileTask(this, asset).execute();
-                    }
-                }
             }
         }
     }
 
 
     private void saveAutoCampaignData(CampaignModel model) {
+        downloadAutoCampaign = true;
 
         campaignDB.insertData(model);
-
-        ChannelSource channelDB = new ChannelSource(this);
         if (model.getChannelList().size() > 0) {
+            ChannelSource channelDB = new ChannelSource(this);
 
             for (int i = 0; i < model.getChannelList().size(); i++) {
                 ChannelModel channelModel = model.getChannelList().get(i);
-
                 channelDB.insertData(channelModel, model.getCampaignId());
+                if (channelModel.getAssetsList().size() > 0)
+                    enqueueDownloads(channelModel.getAssetsList(), channelModel.getChannelId());
 
-                if (channelModel.getAssetsList().size() > 0) {
-
-                    for (int j = 0; j < channelModel.getAssetsList().size(); j++) {
-
-                        AssetsModel asset = channelModel.getAssetsList().get(j);
-                        asset.setChannel_id(channelModel.getChannelId());
-                        try {
-
-                            if (asset.getAssetType().equals("video")) {
-                                Log.v("VIDEO", "TYPE VIDEO");
-                                /*DownloadFileFromURL task = new DownloadFileFromURL(this, asset);
-                                task.execute();
-                                String file_url = task.get();*/
-                                asset.setAsset_local_url("");
-                            } else {
-                                DownloadFileFromURL task = new DownloadFileFromURL(this, asset);
-                                task.execute();
-                                String file_url = task.get();
-                                asset.setAsset_local_url(file_url);
-                            }
-                            AssetsSource assetsSource = new AssetsSource(this);
-                            assetsSource.insertData(asset);
-
-                        } catch (InterruptedException | ExecutionException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-                }
             }
         }
-
-        if (progressBar != null)
-            progressBar.dismiss();
-
-
-        createCampaignPlayer(model.getCampaignId());
     }
 
 
@@ -631,4 +600,39 @@ public class PlayerActivity extends BaseActivity implements JSONResult, SmartSch
 
     }
 
+
+    private void enqueueDownloads(ArrayList<AssetsModel> mList, String channelId) {
+        requests = DownloadUtils.getAutoCampaignList(this, mList, channelId, downloadAutoCampaign);
+        fetch.enqueue(requests);
+    }
+
+    @Override
+    public void onUpdate(long id, int status, int progress, long downloadedBytes,
+                         long fileSize, int error) {
+
+        if (status == Fetch.STATUS_DONE) {
+            count++;
+        } else if (status == Fetch.STATUS_ERROR) {
+            count++;
+        } else if (error != Fetch.NO_ERROR) {
+            count++;
+        }
+
+        if (requests.size() > 0) {
+            float per = (count / requests.size()) * 100;
+            if (per < 100)
+                Log.v("DOWNLOAD", " DOWNLOADED [" + count + "/" + requests.size() + "]");
+            else {
+                fetch.release();
+                if (downloadAutoCampaign) {
+                    createCampaignPlayer(autoCampaignId);
+                    if (progressBar.isShowing()) {
+                        progressBar.dismiss();
+                    }
+                }
+            }
+        }
+
+
+    }
 }

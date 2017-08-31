@@ -59,7 +59,7 @@ public class SlideView extends BaseSliderView {
             iv_image.setVisibility(View.VISIBLE);
         }
 
-        bindEventAndShow(v, iv_image, fl_video, tv_video);
+        bindEventAndShow(parent,v, iv_image, fl_video, tv_video);
         return v;
     }
 }

@@ -1,6 +1,7 @@
 package com.digitalwall.slidertypes;
 
 import android.content.Context;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,6 +11,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.digitalwall.R;
+import com.digitalwall.activities.BaseActivity;
+import com.digitalwall.activities.PlayerActivity;
 import com.digitalwall.utils.UImageLoader;
 import com.digitalwall.views.TextureVideoView;
 import com.squareup.picasso.Callback;
@@ -125,7 +128,10 @@ public abstract class BaseSliderView {
      * @param targetImageView where to place image
      * @param tv_video
      */
-    protected void bindEventAndShow(final View v, ImageView targetImageView,
+
+    private MediaPlayer mediaPlayer;
+
+    protected void bindEventAndShow(final PlayerActivity parent, final View v, ImageView targetImageView,
                                     FrameLayout fl_video, final TextureVideoView tv_video) {
         final BaseSliderView me = this;
 
@@ -138,26 +144,30 @@ public abstract class BaseSliderView {
                 tv_video.setVisibility(View.VISIBLE);
                 tv_video.requestFocus();
 
-                if (mFile != null) {
+                if (mFile != null)
                     tv_video.setVideoPath("file://" + mFile.toString());
-                } else {
+                else
                     tv_video.setVideoURI(Uri.parse(mUrl));
-                }
+
 
                 tv_video.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                     @Override
                     public void onPrepared(MediaPlayer mp) {
+                        muteAndUnMute(parent, false);
                         tv_video.setVisibility(View.VISIBLE);
                         tv_video.start();
+                        tv_video.mMediaPlayer = mp;
                         try {
                             mp.setVolume(1, 1);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+
                         mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                             @Override
                             public void onCompletion(MediaPlayer mp) {
                                 mp.setVolume(0, 0);
+                                mp.reset();
                             }
                         });
                     }
@@ -167,6 +177,7 @@ public abstract class BaseSliderView {
                     @Override
                     public void onCompletion(MediaPlayer mp) {
                         mp.setVolume(0, 0);
+                        mp.reset();
                     }
                 });
             } catch (IllegalStateException e) {
@@ -174,9 +185,11 @@ public abstract class BaseSliderView {
             }
 
         } else {
+
+            muteAndUnMute(parent, true);
+
             targetImageView.setVisibility(View.VISIBLE);
             fl_video.setVisibility(View.GONE);
-
 
             if (mFile != null) {
                 String decodedImgUri = "file://" + mFile.toString();
@@ -225,8 +238,11 @@ public abstract class BaseSliderView {
             });*/
 
         }
+    }
 
-
+    private void muteAndUnMute(BaseActivity parent, boolean status) {
+        AudioManager amanager = (AudioManager) parent.getSystemService(Context.AUDIO_SERVICE);
+        amanager.setStreamMute(AudioManager.STREAM_MUSIC, status);
     }
 
 

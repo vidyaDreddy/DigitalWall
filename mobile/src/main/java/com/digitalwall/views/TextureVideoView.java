@@ -49,7 +49,7 @@ public class TextureVideoView extends TextureView
 
     // All the stuff we need for playing and showing a video
     private Surface mSurface = null;
-    private MediaPlayer mMediaPlayer = null;
+    public MediaPlayer mMediaPlayer = null;
     private int mAudioSession;
     private int mVideoWidth;
     private int mVideoHeight;
