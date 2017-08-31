@@ -27,8 +27,6 @@ import com.digitalwall.services.JSONResult;
 import com.digitalwall.services.JSONTask;
 import com.digitalwall.utils.DateUtils;
 import com.digitalwall.utils.DeviceInfo;
-import com.digitalwall.utils.DownloadFileFromURL;
-import com.digitalwall.utils.DownloadScheFileTask;
 import com.digitalwall.utils.DownloadUtils;
 import com.digitalwall.utils.PlayerUtils;
 import com.digitalwall.utils.Preferences;
@@ -351,12 +349,13 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
                 JSONObject jObject = (JSONObject) result;
                 String status = jObject.optString("status");
                 if (status.equalsIgnoreCase("success")) {
-                    ArrayList<ScheduleModel> scheduleModels =
-                            getScheduleCampaignModelList(jObject);
+                    ArrayList<ScheduleModel> scheduleModels = getScheduleCampaignModelList(jObject);
                     for (int i = 0; i < scheduleModels.size(); i++) {
                         schedulesDB.insertData(scheduleModels.get(i));
                     }
-                    initilizeScheduleCampaign();
+
+                    String campaignId = jObject.optString("campaignId");
+                    initilizeScheduleCampaign(campaignId);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -375,7 +374,9 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
                         ScheduleModel model = scheduleModels.get(i);
                         schedulesDB.insertData(model);
                     }
-                    initilizeScheduleCampaign();
+
+                    String campaignId = jObject.optString("campaignId");
+                    initilizeScheduleCampaign(campaignId);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -434,13 +435,19 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
     }
 
 
-    private void initilizeScheduleCampaign() {
+    private void initilizeScheduleCampaign(String campaignId) {
 
         ArrayList<ScheduleModel> mList = schedulesDB.getAllScheduleList();
 
         for (int i = 0; i < mList.size(); i++) {
             ScheduleModel model = mList.get(i);
             scheduleACampaign(model);
+        }
+
+        /*DOWNLOAD AND SYNC THE SCHEDULE INFO*/
+        if (!campaignDB.isCampaignDataAvailable(campaignId)) {
+            playLiveData = false;
+            getScheduleChannelInfo(clientId, campaignId);
         }
 
 
@@ -640,7 +647,6 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
             if (per < 100)
                 Log.v("DOWNLOAD", " DOWNLOADED [" + count + "/" + requests.size() + "]");
             else {
-                fetch.release();
                 if (downloadAutoCampaign) {
                     createCampaignPlayer(autoCampaignId);
                     if (progressBar.isShowing()) {
