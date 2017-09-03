@@ -20,7 +20,6 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-
             android:name=".activities.SplashActivity"
             android:configChanges="keyboardHidden|orientation"
             android:screenOrientation="landscape">
@@ -34,7 +33,7 @@
         <activity
             android:name=".activities.PlayerActivity"
             android:configChanges="keyboardHidden|orientation"
-            android:screenOrientation="landscape" />
+        android:screenOrientation="landscape" />
 
 
 

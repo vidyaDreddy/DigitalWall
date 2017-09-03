@@ -27,7 +27,7 @@ public class DownloadUtils {
 
             String type = model.getAssetType();
             if (type.equals("video"))
-                model.setAssetUrl("https://www.rmp-streaming.com/media/bbb-360p.mp4");
+                model.setAssetUrl(model.getAssetUrl());
             String file_url;
             if (autoCampaign)
                 file_url = getAutoCampaignFilePath(model.getAssetUrl());

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -37,10 +38,13 @@ import com.tonyodev.fetch.Fetch;
 import com.tonyodev.fetch.listener.FetchListener;
 import com.tonyodev.fetch.request.Request;
 
+import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -81,6 +85,15 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_slide);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -177,6 +190,9 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
                                 break;
                             case "SCHEDULEDELETED":
                                 deleteAScheduleCampaign(jObject);
+                                break;
+                            case "CLEARCACHE":
+                                deleteLocalFiles();
                                 break;
                         }
 
@@ -677,5 +693,14 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
                 }
             }
         }
+    }
+    public void deleteLocalFiles(){
+        File dir = new File(DownloadUtils.getSaveDir());
+        try {
+            FileUtils.deleteDirectory(dir);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }

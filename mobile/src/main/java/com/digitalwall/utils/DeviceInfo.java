@@ -126,7 +126,7 @@ public class DeviceInfo {
     public static int getReferenceWidth(String orientation) {
         if (!Utils.isValueNullOrEmpty(orientation)
                 && orientation.equalsIgnoreCase("landscape"))
-            return 1920;
+            return 1820;
         else
             return 1080;
     }
@@ -134,7 +134,7 @@ public class DeviceInfo {
     public static int getReferenceHeight(String orientation) {
         if (!Utils.isValueNullOrEmpty(orientation)
                 && orientation.equalsIgnoreCase("landscape"))
-            return 1080;
+            return 980;
         else
             return 1920;
     }

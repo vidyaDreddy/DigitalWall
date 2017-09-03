@@ -166,7 +166,7 @@ public abstract class BaseSliderView {
                         mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                             @Override
                             public void onCompletion(MediaPlayer mp) {
-                                mp.setVolume(0, 0);
+//                                mp.setVolume(0, 0);
                                 mp.reset();
                             }
                         });
@@ -176,7 +176,7 @@ public abstract class BaseSliderView {
 
                     @Override
                     public void onCompletion(MediaPlayer mp) {
-                        mp.setVolume(0, 0);
+//                        mp.setVolume(0, 0);
                         mp.reset();
                     }
                 });
@@ -186,7 +186,7 @@ public abstract class BaseSliderView {
 
         } else {
 
-            muteAndUnMute(parent, true);
+            muteAndUnMute(parent, false);
 
             targetImageView.setVisibility(View.VISIBLE);
             fl_video.setVisibility(View.GONE);
