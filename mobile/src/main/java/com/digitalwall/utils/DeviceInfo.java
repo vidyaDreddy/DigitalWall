@@ -29,6 +29,7 @@ public class DeviceInfo {
     /*RETURNS THE DEVICE CURRENT BATTERY PERCENTAGE*/
     public static int getBatteryPercentage(Context context) {
 
+        /*test*/
         IntentFilter iFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         Intent batteryStatus = context.registerReceiver(null, iFilter);
 
