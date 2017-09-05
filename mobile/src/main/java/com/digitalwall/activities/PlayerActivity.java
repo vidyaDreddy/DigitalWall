@@ -468,17 +468,19 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
 
 
     private void saveScheduleCampaignData(CampaignModel model) {
-        downloadAutoCampaign = false;
+        String campaignId = model.getCampaignId();
+        if (!campaignDB.isCampaignDataAvailable(campaignId)) {
+            downloadAutoCampaign = false;
+            campaignDB.insertData(model);
+            if (model.getChannelList().size() > 0) {
+                ChannelSource channelDB = new ChannelSource(this);
 
-        campaignDB.insertData(model);
-        if (model.getChannelList().size() > 0) {
-            ChannelSource channelDB = new ChannelSource(this);
-
-            for (int i = 0; i < model.getChannelList().size(); i++) {
-                ChannelModel channelModel = model.getChannelList().get(i);
-                channelDB.insertData(channelModel, model.getCampaignId());
-                if (channelModel.getAssetsList().size() > 0)
-                    enqueueDownloads(channelModel.getAssetsList(), channelModel.getChannelId());
+                for (int i = 0; i < model.getChannelList().size(); i++) {
+                    ChannelModel channelModel = model.getChannelList().get(i);
+                    channelDB.insertData(channelModel, model.getCampaignId());
+                    if (channelModel.getAssetsList().size() > 0)
+                        enqueueDownloads(channelModel.getAssetsList(), channelModel.getChannelId());
+                }
             }
         }
     }
