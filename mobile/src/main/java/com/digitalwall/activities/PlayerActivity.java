@@ -256,7 +256,13 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
         String scheduleId = jObject.getString("scheduleID");
 
         /*DELETE A CAMPAIGN*/
-        deleteScheduleByScheduleId(scheduleId);
+        ScheduleModel model = schedulesDB.getScheduleByCampaignId(scheduleId);
+        if (model != null) {
+            Log.v("DELETE ----", " DELETED SCHE.CAMPAIGN  :" + model.getCampaignId());
+            jobScheduler.removeJob(model.getJobid());
+            jobScheduler.removeJob(model.getJobid() + 12);
+            deleteScheduleByScheduleId(scheduleId);
+        }
     }
 
     private void configureScheduleCampaignPlayer(JSONObject jObject) throws JSONException {

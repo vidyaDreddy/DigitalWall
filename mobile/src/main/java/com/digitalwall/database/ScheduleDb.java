@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.digitalwall.model.CampaignModel;
 import com.digitalwall.model.ScheduleModel;
 
 import org.json.JSONException;
@@ -74,6 +75,52 @@ public class ScheduleDb {
         close();
 
         return insertValue;
+    }
+
+    /* Get model data depends on brand name */
+    public ScheduleModel getScheduleByCampaignId(String schedule_id) {
+
+        ScheduleModel campaignModel = null;
+        open();
+        Cursor cursor = mDatabase.query(DBConstants.TABLE_SCHEDULES, mColumns,
+                DBConstants.SCHEDULES_ID + " = ?", new String[]{schedule_id}, null, null,
+                null);
+        if (cursor.getCount() > 0) {
+            while (cursor.moveToNext()) {
+                try {
+                    JSONObject jsonObject = new JSONObject();
+
+                    jsonObject.put("_id", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.SCHEDULES_ID)));
+                    jsonObject.put("startDate", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.SCHEDULES_START_DATE)));
+                    jsonObject.put("endDate", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.SCHEDULES_END_DATE)));
+                    jsonObject.put("startTime", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.SCHEDULES_START_TIME)));
+                    jsonObject.put("endTime", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.SCHEDULES_END_TIME)));
+                    jsonObject.put("sTime", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.SCHEDULES_S_TIME)));
+                    jsonObject.put("eTime", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.SCHEDULES_E_TIME)));
+                    jsonObject.put("campaignId", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.SCHEDULES_CAMPAIGN_ID)));
+                    jsonObject.put("jobId", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.SCHEDULES_JOB_ID)));
+
+
+                    campaignModel = new ScheduleModel(jsonObject);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        cursor.close();
+        close();
+
+        return campaignModel;
     }
 
     public ArrayList<ScheduleModel> getAllScheduleList() {
