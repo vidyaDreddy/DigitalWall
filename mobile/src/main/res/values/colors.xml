@@ -5,6 +5,11 @@
     <color name="colorAccent">#FF4081</color>
 
     <color name="black_over_lay">#80000000</color>
-
     <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="think_vol">#915edf</color>
+    <color name="light_vol">#5e408c</color>
+
+
+
 </resources>

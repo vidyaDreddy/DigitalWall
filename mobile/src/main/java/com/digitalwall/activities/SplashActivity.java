@@ -1,11 +1,14 @@
 package com.digitalwall.activities;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.util.TypedValue;
 import android.widget.TextView;
 
 import com.digitalwall.R;
@@ -26,21 +29,20 @@ public class SplashActivity extends BaseActivity implements JSONResult {
     private Handler handler;
     private JSONRawTask generateUnSignesAccessTask;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        TextView tv_info = (TextView) findViewById(R.id.tv_info);
+        TextView tv_digital_label = (TextView) findViewById(R.id.tv_digital_label);
+        tv_digital_label.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                getResources().getDimension(R.dimen.text_font));
 
-        String details = "VERSION.RELEASE : " + DeviceInfo.getDeviceOSVersion(this)
-                + "\nBRAND : " + DeviceInfo.getDeviceBrandName(this)
-                + "\nHARDWARE : " + DeviceInfo.getDeviceHardwareName(this)
-                + "\nMANUFACTURER : " + DeviceInfo.getDeviceManufacture(this)
-                + "\nMODEL : " + DeviceInfo.getDeviceModelName(this)
-                + "\nBATTERY PERCENTAGE : " + DeviceInfo.getBatteryPercentage(this) + "%"
-                + "\nVOLUME : " + DeviceInfo.getDeviceVolume(this);
-        tv_info.setText(details);
+        TextView tv_wall_label = (TextView) findViewById(R.id.tv_wall_label);
+        tv_wall_label.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                getResources().getDimension(R.dimen.text_font));
 
 
         if (Utils.isMarshmallowOS()) {
@@ -138,6 +140,7 @@ public class SplashActivity extends BaseActivity implements JSONResult {
                     DeviceModel model = new DeviceModel(jObject);
                     ApiConfiguration.setAuthToken(this, ApiConfiguration.PREF_KEY_DISPLAY_ID,
                             model.getDisplayKey());
+
                     navigateToDashBoard();
                 }
             } catch (JSONException e) {

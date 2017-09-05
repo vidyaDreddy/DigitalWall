@@ -6,4 +6,10 @@
 
     <dimen name="_40sp">40sp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+
+    <dimen name="text_font">30dp</dimen>
+
+
+
+    result_font
 </resources>

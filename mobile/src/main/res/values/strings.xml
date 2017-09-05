@@ -2,4 +2,7 @@
     <string name="app_name">DigitalWall</string>
     <string name="title_activity_slide">SlideActivity</string>
     <string name="txt_cd">empty</string>
+    <string name="txt_digital">Digital</string>
+    <string name="txt_wall">Wall</string>
+    <string name="txt_license_key">License Key:</string>
 </resources>

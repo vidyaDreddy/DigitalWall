@@ -3,11 +3,13 @@ package com.digitalwall.activities;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.media.AudioManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -33,7 +35,6 @@ import com.digitalwall.utils.Preferences;
 import com.digitalwall.utils.Utils;
 import com.github.pwittchen.networkevents.library.BusWrapper;
 import com.github.pwittchen.networkevents.library.ConnectivityStatus;
-import com.github.pwittchen.networkevents.library.MobileNetworkType;
 import com.github.pwittchen.networkevents.library.NetworkEvents;
 import com.github.pwittchen.networkevents.library.event.ConnectivityChanged;
 import com.mixpanel.android.java_websocket.client.WebSocketClient;
@@ -47,7 +48,6 @@ import com.tonyodev.fetch.request.Request;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -67,11 +67,13 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
     private BusWrapper busWrapper;
     private NetworkEvents networkEvents;
 
-    private TextView tv_display_key;
+    private LinearLayout ll_display_key;
     private RelativeLayout rl_main;
     public String display_key;
     public String clientId;
     public String autoCampaignId;
+
+    private AudioManager mAudioManager;
 
     private SmartScheduler jobScheduler;
 
@@ -95,6 +97,12 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
         setContentView(R.layout.activity_slide);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+
+        /*SET DEVICE VOLUME*/
+        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        int deviceVolume = Preferences.getIntSharedPref(this, Preferences.PREF_KEY_VOLUME);
+        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, deviceVolume, 0);
+
         fetch = Fetch.newInstance(this);
         fetch.setAllowedNetwork(Fetch.NETWORK_ALL);
         fetch.addFetchListener(this);
@@ -116,6 +124,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
         clientId = Preferences.getStringSharedPref(this, Preferences.PREF_KEY_CLIENT_ID);
         autoCampaignId = Preferences.getStringSharedPref(this, Preferences.PREF_KEY_AUTO_CAMPAIGN_ID);
 
+
         Log.d("display_key", "......." + display_key);
 
         /*MAIN LAYOUT*/
@@ -123,24 +132,19 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
         rl_main.setVisibility(View.GONE);
 
         /*DISPLAY KEY TEXT_VIEW*/
-        tv_display_key = (TextView) findViewById(R.id.tv_display_key);
-        tv_display_key.setVisibility(View.GONE);
+        ll_display_key = (LinearLayout) findViewById(R.id.ll_display_key);
+        ll_display_key.setVisibility(View.GONE);
+        TextView tv_display_key = (TextView) findViewById(R.id.tv_display_key);
+        tv_display_key.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_font));
+        TextView tv_display_key_label = (TextView) findViewById(R.id.tv_display_key_label);
+        tv_display_key_label.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_font));
 
-        /*CHECK FOR THE PLAYER INFO*/
 
         final ScheduleModel scheduleModel = schedulesDB.getCurrentAviableCampaign();
         if (scheduleModel != null) {
 
             createCampaignPlayer(autoCampaignId);
             scheduleACampaign(scheduleModel);
-
-            /*if (campaignDB.isCampaignDataAvailable(scheduleModel.getCampaignId()))
-                createCampaignPlayer(scheduleModel.getCampaignId());
-            else {
-
-                playLiveData = true;
-                getScheduleChannelInfo(clientId, scheduleModel.getCampaignId());
-            }*/
 
         } else if (!Utils.isValueNullOrEmpty(autoCampaignId)) {
 
@@ -150,8 +154,8 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
                 getAutoCampaignChannelInfo(autoCampaignId);
 
         } else {
-            tv_display_key.setVisibility(View.VISIBLE);
-            tv_display_key.setText("Display ID: " + display_key);
+            ll_display_key.setVisibility(View.VISIBLE);
+            tv_display_key.setText(" " + display_key);
         }
 
         /*CONNECT WITH WEB SOCKET*/
@@ -280,7 +284,10 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
 
         /*VOLUME*/
         int deviceVolume = jObject.getInt("volume");
+        if (mAudioManager != null)
+            mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, deviceVolume, 0);
         Preferences.setIntSharedPref(this, Preferences.PREF_KEY_VOLUME, deviceVolume);
+
 
         /*CLIENT ID*/
         String deviceOrientation = jObject.getString("orientation");
@@ -367,13 +374,13 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
                 JSONObject jObject = (JSONObject) result;
                 String status = jObject.optString("status");
                 if (status.equalsIgnoreCase("success")) {
-                    tv_display_key.setVisibility(View.GONE);
+                    ll_display_key.setVisibility(View.GONE);
                     rl_main.setVisibility(View.VISIBLE);
                     CampaignModel model = new CampaignModel(jObject);
 
                     saveAutoCampaignData(model);
                 } else {
-                    tv_display_key.setVisibility(View.VISIBLE);
+                    ll_display_key.setVisibility(View.VISIBLE);
                     rl_main.setVisibility(View.GONE);
                 }
 
@@ -517,7 +524,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
 
             ArrayList<ChannelModel> cList = campaignModel.getChannelList();
             if (cList.size() > 0 && cList.get(0).getAssetsList() != null) {
-                tv_display_key.setVisibility(View.GONE);
+                ll_display_key.setVisibility(View.GONE);
                 rl_main.setVisibility(View.VISIBLE);
                 PlayerUtils.setAutoCampaignPlayerData(this, rl_main, campaignModel);
             } else {
