@@ -39,6 +39,7 @@ public class DBConstants {
     public static final String COLUMN_ASSET_URL = "asset_url";
     public static final String COLUMN_ASSET_DURATION = "asset_duration";
     public static final String COLUMN_ASSET_LOCAL_URL = "asset_local_url";
+    public static final String COLUMN_ASSET_ANIMATION = "asset_animation";
 
     public static final String CHANNEL_HEIGHT = "height";
     public static final String CHANNEL_WIDTH = "width";
@@ -125,6 +126,8 @@ public class DBConstants {
             + COLUMN_ASSET_LOCAL_URL
             + " TEXT NOT NULL, "
             + COLUMN_ASSET_DURATION
+            + " TEXT NOT NULL, "
+            + COLUMN_ASSET_ANIMATION
             + " TEXT NOT NULL, "
             + CHANNELS_ID
             + " TEXT NOT NULL, "

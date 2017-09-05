@@ -9,7 +9,14 @@ import com.digitalwall.Indicators.PagerIndicator;
 import com.digitalwall.R;
 import com.digitalwall.activities.BaseActivity;
 import com.digitalwall.model.ChannelModel;
+import com.digitalwall.model.ScheduleModel;
 import com.digitalwall.views.SliderLayout;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 /**
  * Created by vidhayadhar
@@ -17,6 +24,35 @@ import com.digitalwall.views.SliderLayout;
  */
 
 public class ChannelUtils {
+
+    public static ArrayList<ScheduleModel> getScheduleCampaignModelList
+            (JSONObject jsonObject) throws JSONException {
+
+        ArrayList<ScheduleModel> scheduleModels = new ArrayList<>();
+        JSONArray mScheduleJsonArray = jsonObject.optJSONArray("schedules");
+
+        for (int i = 0; i < mScheduleJsonArray.length(); i++) {
+            JSONObject mScheduleCampaignModelJson = mScheduleJsonArray.optJSONObject(i);
+
+            mScheduleCampaignModelJson.put("_id", jsonObject.optString("_id"));
+            mScheduleCampaignModelJson.put("campaignId", jsonObject.optString("campaignId"));
+            mScheduleCampaignModelJson.put("jobId", DeviceInfo.randomJobId());
+            mScheduleCampaignModelJson.put("startDate", mScheduleCampaignModelJson.optString("startDate"));
+            mScheduleCampaignModelJson.put("endDate", mScheduleCampaignModelJson.optString("endDate"));
+            mScheduleCampaignModelJson.put("sTime", mScheduleCampaignModelJson.optString("startTime"));
+            mScheduleCampaignModelJson.put("eTime", mScheduleCampaignModelJson.optString("endTime"));
+            mScheduleCampaignModelJson.put("startTime", DateUtils.
+                    convertTimeToSeconds(mScheduleCampaignModelJson.optString("startTime")));
+            mScheduleCampaignModelJson.put("endTime", DateUtils.
+                    convertTimeToSeconds(mScheduleCampaignModelJson.optString("endTime")));
+
+            ScheduleModel scheduleModel = new ScheduleModel(mScheduleCampaignModelJson);
+
+            scheduleModels.add(scheduleModel);
+
+        }
+        return scheduleModels;
+    }
 
 
     /*

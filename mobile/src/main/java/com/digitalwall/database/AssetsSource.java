@@ -20,6 +20,7 @@ public class AssetsSource {
     private String mColumns[] = {DBConstants.COLUMN_ASSET_ID,
             DBConstants.COLUMN_ASSET_TYPE, DBConstants.COLUMN_ASSET_URL,
             DBConstants.COLUMN_ASSET_DURATION, DBConstants.COLUMN_ASSET_LOCAL_URL,
+            DBConstants.COLUMN_ASSET_ANIMATION,
             DBConstants.CHANNELS_ID};
 
     public AssetsSource(Context context) {
@@ -51,6 +52,7 @@ public class AssetsSource {
         values.put(DBConstants.COLUMN_ASSET_URL, model.getAssetUrl());
         values.put(DBConstants.COLUMN_ASSET_DURATION, model.getAssetDuration());
         values.put(DBConstants.COLUMN_ASSET_LOCAL_URL, model.getAsset_local_url());
+        values.put(DBConstants.COLUMN_ASSET_ANIMATION, model.getAsset_animation());
         open();
         insertValue = mDatabase.insert(DBConstants.TABLE_ASSETS, null,
                 values);
@@ -95,6 +97,8 @@ public class AssetsSource {
                             .getColumnIndex(DBConstants.COLUMN_ASSET_URL)));
                     jsonObject.put("local_url", cursor.getString(cursor
                             .getColumnIndex(DBConstants.COLUMN_ASSET_LOCAL_URL)));
+                    jsonObject.put("campaignAnimation", cursor.getString(cursor
+                            .getColumnIndex(DBConstants.COLUMN_ASSET_ANIMATION)));
                     jsonObject.put("channel_id", cursor.getString(cursor
                             .getColumnIndex(DBConstants.CHANNELS_ID)));
                     AssetsModel model = null;
@@ -138,6 +142,7 @@ public class AssetsSource {
         values.put(DBConstants.COLUMN_ASSET_URL, model.getAssetUrl());
         values.put(DBConstants.COLUMN_ASSET_DURATION, model.getAssetDuration());
         values.put(DBConstants.COLUMN_ASSET_LOCAL_URL, model.getAsset_local_url());
+        values.put(DBConstants.COLUMN_ASSET_ANIMATION, model.getAsset_animation());
 
         open();
         updateValue = mDatabase.update(DBConstants.TABLE_ASSETS, values,

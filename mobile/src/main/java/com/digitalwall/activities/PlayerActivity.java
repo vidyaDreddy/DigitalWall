@@ -22,11 +22,10 @@ import com.digitalwall.model.ScheduleModel;
 import com.digitalwall.scheduler.Job;
 import com.digitalwall.scheduler.SmartScheduler;
 import com.digitalwall.services.ApiConfiguration;
-import com.digitalwall.services.DownloadResult;
 import com.digitalwall.services.JSONResult;
 import com.digitalwall.services.JSONTask;
+import com.digitalwall.utils.ChannelUtils;
 import com.digitalwall.utils.DateUtils;
-import com.digitalwall.utils.DeviceInfo;
 import com.digitalwall.utils.DownloadUtils;
 import com.digitalwall.utils.PlayerUtils;
 import com.digitalwall.utils.Preferences;
@@ -37,7 +36,6 @@ import com.tonyodev.fetch.Fetch;
 import com.tonyodev.fetch.listener.FetchListener;
 import com.tonyodev.fetch.request.Request;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -51,7 +49,7 @@ import java.util.List;
 @SuppressWarnings("deprecation")
 @SuppressLint("SetTextI18n")
 public class PlayerActivity extends BaseActivity implements JSONResult,
-        SmartScheduler.JobScheduledCallback, FetchListener, DownloadResult {
+        SmartScheduler.JobScheduledCallback, FetchListener {
 
     private JSONTask getChannelListInfo;
 
@@ -169,7 +167,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
 
                         switch (type) {
                             case "PLAYERCREATED":
-                                configureAutoCampaignPlayer(jObject);
+                                configureCampaignPlayer(jObject);
                                 break;
                             case "SCHEDULECREATED":
                                 configureScheduleCampaignPlayer(jObject);
@@ -227,7 +225,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
     }
 
 
-    private void configureAutoCampaignPlayer(JSONObject jObject) throws JSONException {
+    private void configureCampaignPlayer(JSONObject jObject) throws JSONException {
 
         /*CAMPAIGN ID*/
         autoCampaignId = jObject.getString("campID");
@@ -245,12 +243,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
         String deviceOrientation = jObject.getString("orientation");
         Preferences.setStringSharedPref(this, Preferences.PREF_KEY_ORIENTATION, deviceOrientation);
 
-        /*GET CHANNEL INFO FOR AUTO CAMPAIGN*/
-        if (campaignDB.isCampaignDataAvailable(autoCampaignId)) {
-            createCampaignPlayer(autoCampaignId);
-        } else {
-            getAutoCampaignChannelInfo(autoCampaignId);
-        }
+        getAutoCampaignChannelInfo(autoCampaignId);
     }
 
 
@@ -337,30 +330,10 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
 
                     saveAutoCampaignData(model);
                 } else {
-
                     tv_display_key.setVisibility(View.VISIBLE);
                     rl_main.setVisibility(View.GONE);
                 }
 
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-          /*GET THE SCHEDULE CAMPAIGN INFO*/
-        if (code == ApiConfiguration.GET_UPDATE_SCHEDULE_INFO_CODE) {
-            try {
-                JSONObject jObject = (JSONObject) result;
-                String status = jObject.optString("status");
-                if (status.equalsIgnoreCase("success")) {
-                    ArrayList<ScheduleModel> scheduleModels = getScheduleCampaignModelList(jObject);
-                    for (int i = 0; i < scheduleModels.size(); i++) {
-                        schedulesDB.insertData(scheduleModels.get(i));
-                    }
-
-                    String campaignId = jObject.optString("campaignId");
-                    initilizeScheduleCampaign(campaignId);
-                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -373,7 +346,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
                 String status = jObject.optString("status");
                 if (status.equalsIgnoreCase("success")) {
                     ArrayList<ScheduleModel> scheduleModels =
-                            getScheduleCampaignModelList(jObject);
+                            ChannelUtils.getScheduleCampaignModelList(jObject);
                     for (int i = 0; i < scheduleModels.size(); i++) {
                         ScheduleModel model = scheduleModels.get(i);
                         schedulesDB.insertData(model);
@@ -410,34 +383,6 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
 
     }
 
-    private ArrayList<ScheduleModel> getScheduleCampaignModelList(JSONObject jsonObject) throws JSONException {
-
-        ArrayList<ScheduleModel> scheduleModels = new ArrayList<>();
-        JSONArray mScheduleJsonArray = jsonObject.optJSONArray("schedules");
-
-        for (int i = 0; i < mScheduleJsonArray.length(); i++) {
-            JSONObject mScheduleCampaignModelJson = mScheduleJsonArray.optJSONObject(i);
-
-            mScheduleCampaignModelJson.put("_id", jsonObject.optString("_id"));
-            mScheduleCampaignModelJson.put("campaignId", jsonObject.optString("campaignId"));
-            mScheduleCampaignModelJson.put("jobId", DeviceInfo.randomJobId());
-            mScheduleCampaignModelJson.put("startDate", mScheduleCampaignModelJson.optString("startDate"));
-            mScheduleCampaignModelJson.put("endDate", mScheduleCampaignModelJson.optString("endDate"));
-            mScheduleCampaignModelJson.put("sTime", mScheduleCampaignModelJson.optString("startTime"));
-            mScheduleCampaignModelJson.put("eTime", mScheduleCampaignModelJson.optString("endTime"));
-            mScheduleCampaignModelJson.put("startTime", DateUtils.
-                    convertTimeToSeconds(mScheduleCampaignModelJson.optString("startTime")));
-            mScheduleCampaignModelJson.put("endTime", DateUtils.
-                    convertTimeToSeconds(mScheduleCampaignModelJson.optString("endTime")));
-
-            ScheduleModel scheduleModel = new ScheduleModel(mScheduleCampaignModelJson);
-
-            scheduleModels.add(scheduleModel);
-
-        }
-        return scheduleModels;
-    }
-
 
     private void initilizeScheduleCampaign(String campaignId) {
 
@@ -471,7 +416,6 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
                 Preferences.CAMPAIGN_AUTO, eCal.getTimeInMillis(), model.getId());
     }
 
-    private ArrayList<AssetsModel> mAssetList;
 
     private void saveScheduleCampaignData(CampaignModel model) {
         downloadAutoCampaign = false;
@@ -491,6 +435,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
 
 
     private void saveAutoCampaignData(CampaignModel model) {
+
         downloadAutoCampaign = true;
 
         campaignDB.insertData(model);
@@ -500,21 +445,8 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
             for (int i = 0; i < model.getChannelList().size(); i++) {
                 ChannelModel channelModel = model.getChannelList().get(i);
                 channelDB.insertData(channelModel, model.getCampaignId());
-                /*mAssetList = channelModel.getAssetsList();
-                if (mAssetList.size() > 0) {
-                    for (int j = 0; j < mAssetList.size(); j++) {
-                        AssetsModel asset = mAssetList.get(j);
-                        String type = asset.getAssetType();
-                        if (type.equals("video"))
-                            asset.setAssetUrl("https://www.rmp-streaming.com/media/bbb-360p.mp4");
-                        asset.setChannel_id(channelModel.getChannelId());
-                        new DownloadFileFromURL(PlayerActivity.this, this, asset).execute();
-                    }
-                }*/
-
                 if (channelModel.getAssetsList().size() > 0)
                     enqueueDownloads(channelModel.getAssetsList(), channelModel.getChannelId());
-
             }
         }
     }
@@ -661,24 +593,4 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
 
     }
 
-    @Override
-    public void successDownload(String result) {
-        count++;
-
-        if (mAssetList.size() > 0) {
-            float per = (count / mAssetList.size()) * 100;
-            if (per < 100)
-                Log.v("DOWNLOAD", " DOWNLOADED [" + count + "/" + mAssetList.size() + "]");
-            else {
-                Log.v("DOWNLOAD", " DOWNLOAD COMPLETED");
-
-                if (downloadAutoCampaign) {
-                    createCampaignPlayer(autoCampaignId);
-                    if (progressBar.isShowing()) {
-                        progressBar.dismiss();
-                    }
-                }
-            }
-        }
-    }
 }

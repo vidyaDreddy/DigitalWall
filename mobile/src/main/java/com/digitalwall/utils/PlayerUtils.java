@@ -73,7 +73,8 @@ public class PlayerUtils {
 
 
     @SuppressLint("SetTextI18n")
-    private static void initilizeViewPagerWithAssets(PlayerActivity parent, final SliderLayout sl_layout,
+    private static void initilizeViewPagerWithAssets(final PlayerActivity parent,
+                                                     final SliderLayout sl_layout,
                                                      ChannelModel channel) {
 
         /*BOTTOM TEXT LABEL*/
@@ -82,54 +83,44 @@ public class PlayerUtils {
         tv_label.setBackgroundColor(Utils.getColor(parent, R.color.black_over_lay));
         tv_label.setVisibility(View.GONE);
 
-
         /*ASSIGNING THE ASSETS TO THE CHANNEL*/
         final ArrayList<AssetsModel> mList = channel.getAssetsList();
         if (mList != null && mList.size() > 0) {
 
             for (int i = 0; i < mList.size(); i++) {
                 AssetsModel model = mList.get(i);
-
-                SlideView slide = new SlideView(parent, model);
-                slide.setSlideType(model.getAssetType());
-                slide.setPicasso(Picasso.with(parent));
-                slide.image(model.getAssetUrl());
-
-                if (!Utils.isValueNullOrEmpty(model.getAsset_local_url()))
-                    slide.imageFile(new File(model.getAsset_local_url()));
+                SlideView slide = createSlideView(parent, model);
                 sl_layout.addSlider(slide);
+            }
 
-                /*SET SLIDE DURATION AND ANIMATION TO THE  ONLY 1ST ASSET*//*
-                if (mList.size() > 0) {
-                    sl_layout.setDuration(mList.get(0).getAssetDuration());
+            //SET SLIDE DURATION AND ANIMATION TO THE  ONLY 1ST ASSET/*
+            sl_layout.setDuration(mList.get(0).getAssetDuration());
+            sl_layout.setPresetTransformer(getAnimation(mList.get(0).getAsset_animation()));
 
-                    JSONObject object = new JSONObject();
-                    try {
-                        object.put("registrationID", parent.display_key);
-                        object.put("Message", "Hi");
-                        //parent.setDateToWebSocket(object.toString());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    //sl_layout.setPresetTransformer(mList.get(0).getAssetAnimation());
+            sl_layout.addOnPageChangeListener(new ViewPagerEx.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+                }
+
+
+                @Override
+                public void onPageSelected(int position) {
+
+                    AssetsModel asset = mList.get(position);
+                    sl_layout.setDuration(asset.getAssetDuration());
+                    sl_layout.setPresetTransformer(getAnimation(asset.getAsset_animation()));
+
+               /* JSONObject object = new JSONObject();
+                try {
+                    object.put("registrationID", parent.display_key);
+                    object.put("Message", "Hi");
+                    //parent.setDateToWebSocket(object.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }*/
-            }
-        }
-
-
-        sl_layout.addOnPageChangeListener(new ViewPagerEx.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-            }
-
-
-            @Override
-            public void onPageSelected(int position) {
-
-                sl_layout.setDuration(mList.get(position).getAssetDuration());
-                //parent.setDateToWebSocket("");
-                //sl_layout.setPresetTransformer(mList.get(position).getAssetAnimation());
+                    //parent.setDateToWebSocket("");
+                    //sl_layout.setPresetTransformer(mList.get(position).getAssetAnimation());
 
 
                /* if (position == 0) {
@@ -137,26 +128,90 @@ public class PlayerUtils {
                     sl_layout.stopAutoCycle();
                     sl_layout.moveNextPosition();
                 }*/
-            }
+                }
 
-            @Override
-            public void onPageScrollStateChanged(int state) {
+                @Override
+                public void onPageScrollStateChanged(int state) {
 
-            }
-        });
+                }
+            });
+
+
+        }
+
+
     }
 
 
-    private SlideView createSlideView(PlayerActivity parent, AssetsModel model) {
+    private static SlideView createSlideView(PlayerActivity parent, AssetsModel model) {
 
         SlideView slide = new SlideView(parent, model);
         slide.setSlideType(model.getAssetType());
-        //slide.setPicasso(Picasso.with(parent));
-        slide.setScaleType(BaseSliderView.ScaleType.Fit);
+        slide.setPicasso(Picasso.with(parent));
         slide.image(model.getAssetUrl());
+
+        if (!Utils.isValueNullOrEmpty(model.getAsset_local_url()))
+            slide.imageFile(new File(model.getAsset_local_url()));
 
         return slide;
 
     }
 
+
+    private static SliderLayout.Transformer getAnimation(String anim) {
+        SliderLayout.Transformer mTransformer;
+
+        switch (anim) {
+            case "Accordion":
+                mTransformer = SliderLayout.Transformer.Accordion;
+                break;
+            case "Background2Foreground":
+                mTransformer = SliderLayout.Transformer.Background2Foreground;
+                break;
+            case "CubeIn":
+                mTransformer = SliderLayout.Transformer.CubeIn;
+                break;
+            case "DepthPage":
+                mTransformer = SliderLayout.Transformer.DepthPage;
+                break;
+            case "Fade":
+                mTransformer = SliderLayout.Transformer.Fade;
+                break;
+            case "FlipHorizontal":
+                mTransformer = SliderLayout.Transformer.FlipHorizontal;
+                break;
+            case "FlipPage":
+                mTransformer = SliderLayout.Transformer.FlipPage;
+                break;
+            case "Foreground2Background":
+                mTransformer = SliderLayout.Transformer.Foreground2Background;
+                break;
+            case "RotateDown":
+                mTransformer = SliderLayout.Transformer.RotateDown;
+                break;
+            case "RotateUp":
+                mTransformer = SliderLayout.Transformer.RotateUp;
+                break;
+            case "Stack":
+                mTransformer = SliderLayout.Transformer.Stack;
+                break;
+            case "Tablet":
+                mTransformer = SliderLayout.Transformer.Tablet;
+                break;
+            case "ZoomIn":
+                mTransformer = SliderLayout.Transformer.ZoomIn;
+                break;
+            case "ZoomOutSlide":
+                mTransformer = SliderLayout.Transformer.ZoomOutSlide;
+                break;
+            case "ZoomOut":
+                mTransformer = SliderLayout.Transformer.ZoomOut;
+                break;
+            default:
+                mTransformer = SliderLayout.Transformer.Default;
+                break;
+        }
+
+        return mTransformer;
+    }
 }
