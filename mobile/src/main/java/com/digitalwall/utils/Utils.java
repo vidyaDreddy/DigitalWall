@@ -14,6 +14,8 @@ import com.digitalwall.activities.BaseActivity;
 import com.digitalwall.model.TileModel;
 import com.digitalwall.model.LayoutModel;
 import com.digitalwall.views.SliderLayout;
+import com.github.pwittchen.networkevents.library.BusWrapper;
+import com.squareup.otto.Bus;
 
 import java.util.ArrayList;
 
@@ -134,6 +136,26 @@ public class Utils {
             isValue = true;
         }
         return isValue;
+    }
+
+
+    public static BusWrapper getOttoBusWrapper(final Bus bus) {
+        return new BusWrapper() {
+            @Override
+            public void register(Object object) {
+                bus.register(object);
+            }
+
+            @Override
+            public void unregister(Object object) {
+                bus.unregister(object);
+            }
+
+            @Override
+            public void post(Object event) {
+                bus.post(event);
+            }
+        };
     }
 
 

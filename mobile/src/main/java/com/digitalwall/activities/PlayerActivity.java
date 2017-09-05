@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -30,8 +31,15 @@ import com.digitalwall.utils.DownloadUtils;
 import com.digitalwall.utils.PlayerUtils;
 import com.digitalwall.utils.Preferences;
 import com.digitalwall.utils.Utils;
+import com.github.pwittchen.networkevents.library.BusWrapper;
+import com.github.pwittchen.networkevents.library.ConnectivityStatus;
+import com.github.pwittchen.networkevents.library.MobileNetworkType;
+import com.github.pwittchen.networkevents.library.NetworkEvents;
+import com.github.pwittchen.networkevents.library.event.ConnectivityChanged;
 import com.mixpanel.android.java_websocket.client.WebSocketClient;
 import com.mixpanel.android.java_websocket.handshake.ServerHandshake;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 import com.tonyodev.fetch.Fetch;
 import com.tonyodev.fetch.listener.FetchListener;
 import com.tonyodev.fetch.request.Request;
@@ -39,6 +47,7 @@ import com.tonyodev.fetch.request.Request;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -54,6 +63,9 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
     private JSONTask getChannelListInfo;
 
     public WebSocketClient webSocketClient;
+
+    private BusWrapper busWrapper;
+    private NetworkEvents networkEvents;
 
     private TextView tv_display_key;
     private RelativeLayout rl_main;
@@ -91,6 +103,9 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
         schedulesDB = new ScheduleDb(this);
 
         jobScheduler = SmartScheduler.getInstance(this);
+
+        busWrapper = Utils.getOttoBusWrapper(new Bus());
+        networkEvents = new NetworkEvents(this, busWrapper).enableInternetCheck().enableWifiScan();
 
         progressBar = new ProgressDialog(this);
         progressBar.setCancelable(false);
@@ -142,6 +157,34 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
         /*CONNECT WITH WEB SOCKET*/
         connectWithWebSocket(display_key);
 
+    }
+
+    @Subscribe
+    public void onEvent(ConnectivityChanged event) {
+
+        ConnectivityStatus wifiStatus = event.getConnectivityStatus();
+        if (wifiStatus == ConnectivityStatus.WIFI_CONNECTED_HAS_INTERNET ||
+                wifiStatus == ConnectivityStatus.MOBILE_CONNECTED) {
+            if (webSocketClient != null && webSocketClient.isClosed())
+                connectWithWebSocket(display_key);
+        }
+
+        //MobileNetworkType netStatus = event.getMobileNetworkType();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        busWrapper.register(this);
+        networkEvents.register();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        busWrapper.unregister(this);
+        networkEvents.unregister();
     }
 
 
@@ -448,6 +491,8 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
                 if (channelModel.getAssetsList().size() > 0)
                     enqueueDownloads(channelModel.getAssetsList(), channelModel.getChannelId());
             }
+
+
         }
     }
 
@@ -577,6 +622,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
             count++;
         }
 
+
         if (requests.size() > 0) {
             float per = (count / requests.size()) * 100;
             if (per < 100)
@@ -592,5 +638,6 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
         }
 
     }
+
 
 }
