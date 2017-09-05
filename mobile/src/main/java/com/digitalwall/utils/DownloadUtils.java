@@ -25,9 +25,9 @@ public class DownloadUtils {
         List<Request> requests = new ArrayList<>();
         for (AssetsModel model : mList) {
 
-            String type = model.getAssetType();
+            /*String type = model.getAssetType();
             if (type.equals("video"))
-                model.setAssetUrl("https://www.rmp-streaming.com/media/bbb-360p.mp4");
+                model.setAssetUrl("https://www.rmp-streaming.com/media/bbb-360p.mp4");*/
             String file_url;
             if (autoCampaign)
                 file_url = getAutoCampaignFilePath(model.getAssetUrl());

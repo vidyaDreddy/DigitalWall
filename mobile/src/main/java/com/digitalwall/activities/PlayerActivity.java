@@ -246,7 +246,11 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
         Preferences.setStringSharedPref(this, Preferences.PREF_KEY_ORIENTATION, deviceOrientation);
 
         /*GET CHANNEL INFO FOR AUTO CAMPAIGN*/
-        getAutoCampaignChannelInfo(autoCampaignId);
+        if (campaignDB.isCampaignDataAvailable(autoCampaignId)) {
+            createCampaignPlayer(autoCampaignId);
+        } else {
+            getAutoCampaignChannelInfo(autoCampaignId);
+        }
     }
 
 
@@ -543,7 +547,6 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
                 getScheduleChannelInfo(campaignModel.getClientId(), campaignId);
             }
         }
-
     }
 
 

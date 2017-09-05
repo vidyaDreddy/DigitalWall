@@ -5,7 +5,6 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -15,9 +14,7 @@ import com.digitalwall.activities.BaseActivity;
 import com.digitalwall.activities.PlayerActivity;
 import com.digitalwall.utils.UImageLoader;
 import com.digitalwall.views.TextureVideoView;
-import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.RequestCreator;
 
 import java.io.File;
 
@@ -129,12 +126,9 @@ public abstract class BaseSliderView {
      * @param tv_video
      */
 
-    private MediaPlayer mediaPlayer;
 
     protected void bindEventAndShow(final PlayerActivity parent, final View v, ImageView targetImageView,
                                     FrameLayout fl_video, final TextureVideoView tv_video) {
-        final BaseSliderView me = this;
-
 
         if (slideType.equals("video")) {
             targetImageView.setVisibility(View.GONE);
@@ -180,6 +174,28 @@ public abstract class BaseSliderView {
                         mp.reset();
                     }
                 });
+                tv_video.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                    @Override
+                    public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
+
+                        if (mFile != null) {
+                         /*TIME OUT ERROR*/
+                            if (extra == MediaPlayer.MEDIA_ERROR_TIMED_OUT) {
+                                resetVideoPlayer(parent, tv_video);
+                            }
+                         /*INPUT ERROR*/
+                            else if (extra == MediaPlayer.MEDIA_ERROR_IO) {
+                                resetVideoPlayer(parent, tv_video);
+                            }
+                            /*FILE NOT FOUND*/
+                            else if (what == MediaPlayer.MEDIA_ERROR_UNKNOWN) {
+                                resetVideoPlayer(parent, tv_video);
+                            }
+                        }
+
+                        return false;
+                    }
+                });
             } catch (IllegalStateException e) {
                 e.printStackTrace();
             }
@@ -197,46 +213,31 @@ public abstract class BaseSliderView {
             } else {
                 UImageLoader.URLPicLoadingFile(targetImageView, mUrl, R.drawable.icon_no_video);
             }
+        }
+    }
 
 
+    private void resetVideoPlayer(final PlayerActivity parent, final TextureVideoView tv_video) {
 
-           /* if (mLoadListener != null) {
-                mLoadListener.onStart(me);
-            }
-
-            Picasso p = (mPicasso != null) ? mPicasso : Picasso.with(mContext);
-            RequestCreator rq = null;
-            if (mFile != null) {
-                rq = p.load(mFile);
-            } else if (mUrl != null) {
-                rq = p.load(mUrl);
-            } else {
-                return;
-            }
-
-            if (rq == null) {
-                return;
-            }
-
-            rq.into(targetImageView, new Callback() {
+        try {
+            tv_video.setVideoURI(Uri.parse(mUrl));
+            tv_video.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
-                public void onSuccess() {
-                    if (v.findViewById(R.id.loading_bar) != null) {
-                        v.findViewById(R.id.loading_bar).setVisibility(View.INVISIBLE);
-                    }
+                public void onPrepared(MediaPlayer mp) {
+                    muteAndUnMute(parent, false);
+                    tv_video.setVisibility(View.VISIBLE);
+                    tv_video.start();
+                    mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mp) {
+                            mp.setVolume(0, 0);
+                            mp.reset();
+                        }
+                    });
                 }
-
-                @Override
-                public void onError() {
-                    if (mLoadListener != null) {
-                        mLoadListener.onEnd(false, me);
-                    }
-                    if (v.findViewById(R.id.loading_bar) != null) {
-                        v.findViewById(R.id.loading_bar).setVisibility(View.INVISIBLE);
-                    }
-                }
-            });*/
-
+            });
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
         }
     }
 
