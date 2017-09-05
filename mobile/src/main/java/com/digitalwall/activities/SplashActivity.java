@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.TypedValue;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.digitalwall.R;
@@ -20,6 +21,7 @@ import com.digitalwall.services.JSONResult;
 import com.digitalwall.utils.DeviceInfo;
 import com.digitalwall.utils.Permissions;
 import com.digitalwall.utils.Utils;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,11 +32,14 @@ public class SplashActivity extends BaseActivity implements JSONResult {
     private JSONRawTask generateUnSignesAccessTask;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+
+
+        ImageView iv_bg = (ImageView) findViewById(R.id.iv_bg);
+        ImageLoader.getInstance().displayImage("drawable://" + R.drawable.login, iv_bg);
 
         TextView tv_digital_label = (TextView) findViewById(R.id.tv_digital_label);
         tv_digital_label.setTextSize(TypedValue.COMPLEX_UNIT_PX,
