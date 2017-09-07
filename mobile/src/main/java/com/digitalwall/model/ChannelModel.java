@@ -23,8 +23,6 @@ public class ChannelModel {
     private String volume;
     private ArrayList<AssetsModel> assetsList;
 
-    String url = "https://player.vimeo.com/play/815962191?s=230880569_1503594895_c9129320243a473a05b98add70bec477&loc=external&context=Vimeo%5CController%5CApi%5CResources%5CVideoController.&download=1&filename=Untitled164.mp4";
-
 
     public ChannelModel(JSONObject object) throws JSONException {
 
@@ -55,11 +53,7 @@ public class ChannelModel {
             for (int i = 0; i < sArray.length(); i++) {
                 JSONObject aObject = sArray.getJSONObject(i);
                 AssetsModel model = new AssetsModel(aObject);
-               /* if (i == 1) {
-                    model.setAssetType("video");
-                    model.setAssetUrl("http://techslides.com/demos/sample-videos/small.mp4");
-                    model.setAssetUrl(url);
-                }*/
+                model.setAssetId(getChannelId() + model.getAssetId());
                 mList.add(model);
             }
         }

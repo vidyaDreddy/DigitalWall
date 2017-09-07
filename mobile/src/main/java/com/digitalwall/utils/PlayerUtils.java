@@ -1,6 +1,7 @@
 package com.digitalwall.utils;
 
 import android.annotation.SuppressLint;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -135,6 +136,7 @@ public class PlayerUtils {
 
                 }
             });
+
 
 
         }

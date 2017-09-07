@@ -83,7 +83,7 @@ public class AssetsSource {
                 DBConstants.CHANNELS_ID + " = ?", new String[]{channel_id}, null, null,
                 null);
         if (cursor.getCount() > 0) {
-            assetsList = new ArrayList<AssetsModel>();
+            assetsList = new ArrayList<>();
             while (cursor.moveToNext()) {
                 try {
                     JSONObject jsonObject = new JSONObject();

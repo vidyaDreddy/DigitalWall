@@ -224,7 +224,6 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
                                 deleteAScheduleCampaign(jObject);
                                 break;
                         }
-
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -487,6 +486,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
                     if (channelModel.getAssetsList().size() > 0)
                         enqueueDownloads(channelModel.getAssetsList(), channelModel.getChannelId());
                 }
+
             }
         }
     }

@@ -2,6 +2,8 @@ package com.digitalwall.utils;
 
 import android.graphics.Color;
 import android.net.ParseException;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -101,8 +103,10 @@ public class ChannelUtils {
             e.printStackTrace();
             rl_tile.setBackgroundColor(Utils.getColor(parent, R.color.colorPrimaryDark));
         }
-
         rl_tile.setIndicatorVisibility(PagerIndicator.IndicatorVisibility.Invisible);
+
+
+
 
         return rl_tile;
     }
