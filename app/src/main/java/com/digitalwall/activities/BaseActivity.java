@@ -18,7 +18,7 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ToolbarUtils.setFullScreenToolbar(this);
+        //ToolbarUtils.setFullScreenToolbar(this);
     }
 
 

@@ -13,8 +13,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.digitalwall.R;
+import com.digitalwall.database.AssetsSource;
+import com.digitalwall.database.CampaignSource;
+import com.digitalwall.database.ChannelSource;
 import com.digitalwall.model.AssetsModel;
 import com.digitalwall.model.CampaignModel;
+import com.digitalwall.model.ChannelModel;
 import com.digitalwall.scheduler.Job;
 import com.digitalwall.scheduler.SmartScheduler;
 import com.digitalwall.services.ApiConfiguration;
@@ -322,6 +326,7 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
                     ll_display_key.setVisibility(View.GONE);
                     rl_main.setVisibility(View.VISIBLE);
                     CampaignModel model = new CampaignModel(jObject);
+                    saveDataInDB(model);
                 } else {
                     ll_display_key.setVisibility(View.VISIBLE);
                     rl_main.setVisibility(View.GONE);
@@ -341,6 +346,29 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
             Log.v("CAMPAIGN:", "FAILED TO GET THE DETAILS");
         }
 
+    }
+
+    /**
+     * This method is used to save data in the db
+     */
+    private void saveDataInDB(CampaignModel model) {
+        CampaignSource campaignSource = new CampaignSource(DashboardActivity.this);
+        ChannelSource channelSource = new ChannelSource(DashboardActivity.this);
+        AssetsSource assetsSource = new AssetsSource(DashboardActivity.this);
+
+        campaignSource.insertData(model);
+
+        if (model != null && model.getChannelList() != null && model.getChannelList().size() > 0)
+            for (int i = 0; i < model.getChannelList().size(); i++) {
+                ChannelModel channelModel = model.getChannelList().get(i);
+                channelSource.insertData(channelModel, model.getCampaignId());
+                if (channelModel != null && channelModel.getAssetsList() != null && channelModel.getAssetsList().size() > 0) {
+                    for (int j = 0; j < channelModel.getAssetsList().size(); j++) {
+                        AssetsModel assetsModel = channelModel.getAssetsList().get(j);
+                        assetsSource.insertData(assetsModel, channelModel.getChannelId());
+                    }
+                }
+            }
     }
 
 

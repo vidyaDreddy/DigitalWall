@@ -41,7 +41,7 @@ public class DownloadUtils {
             model.setChannel_id(channelId);
             model.setAsset_local_url(file_url);
             AssetsSource assetsSource = new AssetsSource(parent);
-            assetsSource.insertData(model);
+            assetsSource.insertData(model, channelId);
         }
         return requests;
     }

@@ -42,16 +42,19 @@ public class AssetsSource {
         }
     }
 
-    public long insertData(AssetsModel model) {
+    public long insertData(AssetsModel model, String channelId) {
         long insertValue = -1;
 
         ContentValues values = new ContentValues();
-        values.put(DBConstants.CHANNELS_ID, model.getChannel_id());
+        values.put(DBConstants.CHANNELS_ID, channelId);
         values.put(DBConstants.COLUMN_ASSET_ID, model.getAssetId());
         values.put(DBConstants.COLUMN_ASSET_TYPE, model.getAssetType());
         values.put(DBConstants.COLUMN_ASSET_URL, model.getAssetUrl());
         values.put(DBConstants.COLUMN_ASSET_DURATION, model.getAssetDuration());
-        values.put(DBConstants.COLUMN_ASSET_LOCAL_URL, model.getAsset_local_url());
+        if (model.getAsset_local_url() != null)
+            values.put(DBConstants.COLUMN_ASSET_LOCAL_URL, model.getAsset_local_url());
+        else
+            values.put(DBConstants.COLUMN_ASSET_LOCAL_URL, "");
         values.put(DBConstants.COLUMN_ASSET_ANIMATION, model.getAsset_animation());
         open();
         insertValue = mDatabase.insert(DBConstants.TABLE_ASSETS, null,
