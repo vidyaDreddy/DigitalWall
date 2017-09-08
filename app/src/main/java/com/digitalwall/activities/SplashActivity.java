@@ -18,13 +18,17 @@ import com.digitalwall.services.ApiConfiguration;
 import com.digitalwall.services.InputParams;
 import com.digitalwall.services.JSONRawTask;
 import com.digitalwall.services.JSONResult;
+import com.digitalwall.utils.AssetUtils;
 import com.digitalwall.utils.DeviceInfo;
+import com.digitalwall.utils.DownloadUtils;
 import com.digitalwall.utils.Permissions;
 import com.digitalwall.utils.Utils;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.File;
 
 public class SplashActivity extends BaseActivity implements JSONResult {
 

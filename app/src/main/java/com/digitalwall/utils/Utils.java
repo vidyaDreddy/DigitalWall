@@ -156,10 +156,10 @@ public class Utils {
         String dir = getSaveDir();
         Uri uri = Uri.parse(url);
         String fileName = uri.getLastPathSegment();
-        return (dir + "/Assets/" + System.nanoTime() + "_" + fileName);
+        return (dir + System.nanoTime() + "_" + fileName);
     }
 
-    private static String getSaveDir() {
+    public static String getSaveDir() {
         return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                 .toString() + "/DigitalWall";
     }

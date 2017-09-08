@@ -16,11 +16,14 @@ import android.view.Display;
 import android.view.WindowManager;
 
 import com.digitalwall.activities.BaseActivity;
+import com.digitalwall.activities.DashboardActivity;
 
+import java.io.File;
 import java.util.Random;
 
 /**
- * Created by vidhayadhar on 30/07/17.
+ * Created by vidhayadhar
+ * on 30/07/17.
  */
 
 public class DeviceInfo {
@@ -141,6 +144,30 @@ public class DeviceInfo {
     public static int randomJobId() {
         Random rand = new Random();
         return rand.nextInt(100000000);
-
     }
+
+
+    public static void deleteTheDeviceCache(DashboardActivity parent) {
+
+        File file = new File(Utils.getSaveDir());
+        boolean status = deleteCache(file);
+        parent.fetch.removeAll();
+    }
+
+    private static boolean deleteCache(File path) {
+        if (path.exists()) {
+            File[] files = path.listFiles();
+            if (files == null) {
+                return true;
+            }
+            for (File file : files) {
+                if (file.isDirectory())
+                    deleteCache(file);
+                else
+                    file.delete();
+            }
+        }
+        return (path.delete());
+    }
+
 }
