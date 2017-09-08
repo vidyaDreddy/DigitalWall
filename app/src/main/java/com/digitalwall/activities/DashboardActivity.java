@@ -75,8 +75,12 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
         setContentView(R.layout.activity_slide);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+
         clientId = Preferences.getStringSharedPref(this, Preferences.PREF_KEY_CLIENT_ID);
         autoCampaignId = Preferences.getStringSharedPref(this, Preferences.PREF_KEY_AUTO_CAMPAIGN_ID);
+        deviceVolume = Preferences.getIntSharedPref(this, Preferences.PREF_KEY_VOLUME);
+        display_key = ApiConfiguration.getAuthToken(this, ApiConfiguration.PREF_KEY_DISPLAY_ID);
+
 
         fetch = Fetch.newInstance(this);
         fetch.setAllowedNetwork(Fetch.NETWORK_ALL);
@@ -124,7 +128,6 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
     private void initilizeView() {
 
         /*SET DEVICE VOLUME*/
-        deviceVolume = Preferences.getIntSharedPref(this, Preferences.PREF_KEY_VOLUME);
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, deviceVolume, 0);
 
@@ -133,17 +136,25 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
         rl_main.setVisibility(View.GONE);
 
         ll_display_key = (LinearLayout) findViewById(R.id.ll_display_key);
-        ll_display_key.setVisibility(View.VISIBLE);
+        ll_display_key.setVisibility(View.GONE);
 
         /*DISPLAY KEY*/
-        display_key = ApiConfiguration.getAuthToken(this, ApiConfiguration.PREF_KEY_DISPLAY_ID);
         TextView tv_display_key = (TextView) findViewById(R.id.tv_display_key);
         tv_display_key.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_font));
-        tv_display_key.setText(display_key);
+        tv_display_key.setText("" + display_key);
 
         /*DISPLAY KEY LABEL*/
         TextView tv_display_key_label = (TextView) findViewById(R.id.tv_display_key_label);
         tv_display_key_label.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_font));
+
+
+        if (!Utils.isValueNullOrEmpty(autoCampaignId)) {
+            ll_display_key.setVisibility(View.GONE);
+            rl_main.setVisibility(View.VISIBLE);
+        } else {
+            ll_display_key.setVisibility(View.VISIBLE);
+            rl_main.setVisibility(View.GONE);
+        }
 
     }
 

@@ -162,7 +162,7 @@ public class SplashActivity extends BaseActivity implements JSONResult {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent intent = new Intent(SplashActivity.this, PlayerActivity.class);
+                Intent intent = new Intent(SplashActivity.this, DashboardActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 finish();

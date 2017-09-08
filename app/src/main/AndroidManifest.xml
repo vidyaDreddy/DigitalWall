@@ -39,6 +39,11 @@
             android:screenOrientation="landscape" />
 
 
+        <activity
+            android:name=".activities.DashboardActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:screenOrientation="landscape" />
+
 
 
         <service

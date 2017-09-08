@@ -37,11 +37,6 @@ public class PlayerUtils {
 
         rl_main.removeAllViews();
 
-        /*SAVE THE LAYOUT ORIENTATION */
-        String orientation = model.getLayoutOrientation();
-        Preferences.setStringSharedPref(parent, Preferences.PREF_KEY_ORIENTATION, orientation);
-        DeviceInfo.setDeviceOrientation(parent, orientation);
-
         ArrayList<ChannelModel> channelList = model.getChannelList();
         if (channelList.size() > 0) {
             for (int i = 0; i < channelList.size(); i++) {

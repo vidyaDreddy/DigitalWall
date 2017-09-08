@@ -536,7 +536,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
                 rl_main.setVisibility(View.VISIBLE);
                 PlayerUtils.setAutoCampaignPlayerData(this, rl_main, campaignModel);
             } else {
-                getScheduleChannelInfo(campaignModel.getClientId(), campaignId);
+                getScheduleChannelInfo(clientId, campaignId);
             }
         }
     }

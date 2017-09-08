@@ -49,8 +49,6 @@ public class CampaignSource {
         values.put(DBConstants.CAMPAIGN_ID, model.getCampaignId());
         values.put(DBConstants.CAMPAIGN_NAME, model.getCampaignName());
         values.put(DBConstants.CAMPAIGN_TYPE, model.getCampaignType());
-        values.put(DBConstants.CAMPAIGN_ORIENTATION, model.getLayoutOrientation());
-        values.put(DBConstants.CAMPAIGN_CLIENT_ID, model.getClientId());
 
         open();
         insertValue = mDatabase.insert(DBConstants.TABLE_CAMPAIGN, null, values);
@@ -175,8 +173,6 @@ public class CampaignSource {
         values.put(DBConstants.CAMPAIGN_ID, model.getCampaignId());
         values.put(DBConstants.CAMPAIGN_NAME, model.getCampaignType());
         values.put(DBConstants.CAMPAIGN_TYPE, model.getCampaignType());
-        values.put(DBConstants.CAMPAIGN_CLIENT_ID, model.getClientId());
-        values.put(DBConstants.CAMPAIGN_ORIENTATION, model.getLayoutOrientation());
 
         open();
 
