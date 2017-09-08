@@ -3,7 +3,9 @@ package com.digitalwall.utils;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -121,14 +123,6 @@ public class Utils {
     }
 
 
-    /**
-     * HIDE THE KEYBOARD
-     **/
-    public static void hideSoftKeyboard(Activity activity, View view) {
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
-    }
-
     public static boolean isValueNullOrEmpty(String value) {
         boolean isValue = false;
         if (value == null || value.equals("") || value.equals("null")
@@ -158,5 +152,16 @@ public class Utils {
         };
     }
 
+    public static String getFileDownloadPath(String url) {
+        String dir = getSaveDir();
+        Uri uri = Uri.parse(url);
+        String fileName = uri.getLastPathSegment();
+        return (dir + "/Assets/" + System.nanoTime() + "_" + fileName);
+    }
+
+    private static String getSaveDir() {
+        return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                .toString() + "/DigitalWall";
+    }
 
 }

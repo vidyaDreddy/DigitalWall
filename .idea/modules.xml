@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/DigitalWall.iml" filepath="$PROJECT_DIR$/DigitalWall.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/fetch/fetch.iml" filepath="$PROJECT_DIR$/fetch/fetch.iml" />
     </modules>
   </component>
 </project>

@@ -1,5 +1,8 @@
 package com.digitalwall.model;
 
+import android.net.Uri;
+import android.os.Environment;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -12,6 +15,7 @@ public class AssetsModel {
 
     private long assetDuration;
     private String assetId;
+    private long downloadId;
     private String assetType;
     private String assetUrl;
     private String channel_id;
@@ -21,8 +25,11 @@ public class AssetsModel {
 
     public AssetsModel(JSONObject object) throws JSONException {
 
-        if (object.has("_id"))
-            setAssetId(object.getString("_id"));
+        if (object.has("_id")) {
+            String assetId = object.optString("_id");
+            setAssetId(assetId);
+            setDownloadId(generateDownloadId(assetId));
+        }
 
         if (object.has("duration") && !object.isNull("duration"))
             setAssetDuration((long) object.getInt("duration"));
@@ -100,4 +107,18 @@ public class AssetsModel {
     public void setAsset_animation(String asset_animation) {
         this.asset_animation = asset_animation;
     }
+
+    public long generateDownloadId(String assetId) {
+        int code = assetId.hashCode();
+        return (long) code;
+    }
+
+    public long getDownloadId() {
+        return downloadId;
+    }
+
+    public void setDownloadId(long downloadId) {
+        this.downloadId = downloadId;
+    }
+
 }

@@ -20,15 +20,12 @@ public class CampaignModel {
 
     private String campaignId;
     private String campaignName;
-    private String clientId;
     private String status;
     private String campaignType;
-    private String layoutOrientation;
     private ArrayList<ChannelModel> channelList;
 
 
     public CampaignModel(JSONObject object) throws JSONException {
-
 
         if (object.has("status"))
             setStatus(object.getString("status"));
@@ -39,15 +36,12 @@ public class CampaignModel {
         if (object.has("campaignName"))
             setCampaignName(object.getString("campaignName"));
 
-        if (object.has("clientID"))
-            setClientId(object.getString("clientID"));
 
         if (object.has("type"))
             setCampaignType(object.getString("type"));
 
         if (object.has("layout")) {
             JSONObject lObject = object.getJSONObject("layout");
-            setLayoutOrientation(lObject.optString("orientation"));
 
             /*CHANNEL LIST ARRAY PARSING*/
             ArrayList<ChannelModel> mList = new ArrayList<>();
@@ -62,13 +56,6 @@ public class CampaignModel {
             }
             setChannelList(mList);
         }
-
-        /*VALIDATE THE ORIENTATION*/
-        String orientation = getLayoutOrientation();
-        if (!Utils.isValueNullOrEmpty(orientation) && orientation.equalsIgnoreCase("landscape"))
-            setLayoutOrientation(orientation);
-        else
-            setLayoutOrientation("portrait");
 
 
     }
@@ -89,13 +76,6 @@ public class CampaignModel {
         this.campaignName = campaignName;
     }
 
-    public String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
 
     public String getStatus() {
         return status;
@@ -103,14 +83,6 @@ public class CampaignModel {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public String getLayoutOrientation() {
-        return layoutOrientation;
-    }
-
-    public void setLayoutOrientation(String layoutOrientation) {
-        this.layoutOrientation = layoutOrientation;
     }
 
     public ArrayList<ChannelModel> getChannelList() {

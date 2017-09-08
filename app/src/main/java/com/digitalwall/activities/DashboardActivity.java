@@ -13,6 +13,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.digitalwall.R;
+import com.digitalwall.model.AssetsModel;
+import com.digitalwall.model.CampaignModel;
 import com.digitalwall.scheduler.Job;
 import com.digitalwall.scheduler.SmartScheduler;
 import com.digitalwall.services.ApiConfiguration;
@@ -36,6 +38,7 @@ import org.json.JSONObject;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 
 @SuppressWarnings("deprecation")
@@ -54,7 +57,9 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
     private AudioManager mAudioManager;
     private SmartScheduler jobScheduler;
-    private Fetch fetch;
+    public Fetch fetch;
+
+    private ArrayList<AssetsModel> assetList;
 
     public String display_key;
     public String clientId;
@@ -128,7 +133,7 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
         rl_main.setVisibility(View.GONE);
 
         ll_display_key = (LinearLayout) findViewById(R.id.ll_display_key);
-        ll_display_key.setVisibility(View.GONE);
+        ll_display_key.setVisibility(View.VISIBLE);
 
         /*DISPLAY KEY*/
         display_key = ApiConfiguration.getAuthToken(this, ApiConfiguration.PREF_KEY_DISPLAY_ID);
@@ -299,12 +304,25 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
         /*GET THE AUTO CAMPAIGN INFO*/
         if (code == ApiConfiguration.GET_AUTO_CAMPAIGN_INFO_CODE) {
-            Log.v("AUTO CAMPAIGN:", "FAILED TO GET THE DETAILS");
+            try {
+                JSONObject jObject = (JSONObject) result;
+                String status = jObject.optString("status");
+                if (status.equalsIgnoreCase("success")) {
+                    ll_display_key.setVisibility(View.GONE);
+                    rl_main.setVisibility(View.VISIBLE);
+                    CampaignModel model = new CampaignModel(jObject);
+                } else {
+                    ll_display_key.setVisibility(View.VISIBLE);
+                    rl_main.setVisibility(View.GONE);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
         /*GET THE SCHEDULE INFO*/
         else if (code == ApiConfiguration.GET_SCHEDULE_INFO_CODE) {
-            Log.v("CAMPAIGN:", "FAILED TO GET THE DETAILS");
+            Log.v("SCHEDULE:", "FAILED TO GET THE DETAILS");
         }
 
          /*GET THE SCHEDULE CAMPAIGN INFO*/
@@ -325,7 +343,7 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
         /*GET THE SCHEDULE INFO*/
         else if (code == ApiConfiguration.GET_SCHEDULE_INFO_CODE) {
-            Log.v("CAMPAIGN:", "FAILED TO GET THE DETAILS");
+            Log.v("SCHEDULE:", "FAILED TO GET THE DETAILS");
         }
 
          /*GET THE SCHEDULE CAMPAIGN INFO*/
@@ -376,7 +394,18 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
     @Override
     public void onUpdate(long id, int status, int progress, long downloadedBytes, long fileSize, int error) {
-
+        switch (status) {
+            case Fetch.STATUS_ERROR:
+                Log.i("DOWNLOAD ERROR", "ASSET ID:" + id);
+                fetch.retry(id);
+                break;
+            case Fetch.STATUS_DOWNLOADING:
+                Log.i("DOWNLOADING", "ASSET ID:" + id + " Pro" + progress);
+                break;
+            case Fetch.STATUS_DONE:
+                Log.i("DOWNLOADED", "ASSET ID:" + id);
+                break;
+        }
 
     }
 
