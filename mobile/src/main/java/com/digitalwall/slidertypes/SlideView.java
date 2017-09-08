@@ -10,6 +10,7 @@ import android.widget.TextView;
 import android.widget.VideoView;
 
 import com.digitalwall.R;
+import com.digitalwall.activities.BaseActivity;
 import com.digitalwall.activities.PlayerActivity;
 import com.digitalwall.model.AssetsModel;
 import com.digitalwall.utils.Utils;
@@ -25,9 +26,9 @@ public class SlideView extends BaseSliderView {
 
 
     private AssetsModel model;
-    private PlayerActivity parent;
+    private BaseActivity parent;
 
-    public SlideView(PlayerActivity parent, AssetsModel model) {
+    public SlideView(BaseActivity parent, AssetsModel model) {
         super(parent);
         this.parent = parent;
         this.model = model;

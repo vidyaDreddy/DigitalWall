@@ -127,7 +127,7 @@ public abstract class BaseSliderView {
      */
 
 
-    protected void bindEventAndShow(final PlayerActivity parent, final View v, ImageView targetImageView,
+    protected void bindEventAndShow(final BaseActivity parent, final View v, ImageView targetImageView,
                                     FrameLayout fl_video, final TextureVideoView tv_video) {
 
         if (slideType.equals("video")) {
@@ -217,7 +217,7 @@ public abstract class BaseSliderView {
     }
 
 
-    private void resetVideoPlayer(final PlayerActivity parent, final TextureVideoView tv_video) {
+    private void resetVideoPlayer(final BaseActivity parent, final TextureVideoView tv_video) {
 
         try {
             tv_video.setVideoURI(Uri.parse(mUrl));

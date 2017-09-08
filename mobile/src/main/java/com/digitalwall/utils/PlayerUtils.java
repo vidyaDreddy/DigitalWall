@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.digitalwall.activities.BaseActivity;
 import com.digitalwall.database.AssetsSource;
 import com.digitalwall.slidertypes.BaseSliderView;
 import com.digitalwall.R;
@@ -32,7 +33,7 @@ import java.util.ArrayList;
 public class PlayerUtils {
 
 
-    public static void setLiveData(PlayerActivity parent, RelativeLayout rl_main, CampaignModel model) {
+    public static void setLiveData(BaseActivity parent, RelativeLayout rl_main, CampaignModel model) {
 
         rl_main.removeAllViews();
 
@@ -55,7 +56,7 @@ public class PlayerUtils {
 
     }
 
-    public static void setAutoCampaignPlayerData(PlayerActivity parent, RelativeLayout rl_main,
+    public static void setAutoCampaignPlayerData(BaseActivity parent, RelativeLayout rl_main,
                                                  CampaignModel campaignModel) {
         rl_main.removeAllViews();
 
@@ -74,7 +75,7 @@ public class PlayerUtils {
 
 
     @SuppressLint("SetTextI18n")
-    private static void initilizeViewPagerWithAssets(final PlayerActivity parent,
+    private static void initilizeViewPagerWithAssets(final BaseActivity parent,
                                                      final SliderLayout sl_layout,
                                                      ChannelModel channel) {
 
@@ -145,7 +146,7 @@ public class PlayerUtils {
     }
 
 
-    private static SlideView createSlideView(PlayerActivity parent, AssetsModel model) {
+    private static SlideView createSlideView(BaseActivity parent, AssetsModel model) {
 
         SlideView slide = new SlideView(parent, model);
         slide.setSlideType(model.getAssetType());
