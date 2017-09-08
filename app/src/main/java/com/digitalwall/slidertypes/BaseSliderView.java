@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -151,16 +152,10 @@ public abstract class BaseSliderView {
                         tv_video.setVisibility(View.VISIBLE);
                         tv_video.start();
                         tv_video.mMediaPlayer = mp;
-                        try {
-                            mp.setVolume(1, 1);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-
                         mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                             @Override
                             public void onCompletion(MediaPlayer mp) {
-                                mp.setVolume(0, 0);
+                                muteAndUnMute(parent, true);
                                 mp.reset();
                             }
                         });
@@ -170,7 +165,7 @@ public abstract class BaseSliderView {
 
                     @Override
                     public void onCompletion(MediaPlayer mp) {
-                        mp.setVolume(0, 0);
+                        muteAndUnMute(parent, true);
                         mp.reset();
                     }
                 });
@@ -242,8 +237,16 @@ public abstract class BaseSliderView {
     }
 
     private void muteAndUnMute(BaseActivity parent, boolean status) {
+
         AudioManager amanager = (AudioManager) parent.getSystemService(Context.AUDIO_SERVICE);
-        amanager.setStreamMute(AudioManager.STREAM_MUSIC, status);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (status)
+                amanager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_MUTE, 0);
+            else
+                amanager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_UNMUTE, 0);
+        } else {
+            amanager.setStreamMute(AudioManager.STREAM_MUSIC, status);
+        }
     }
 
 

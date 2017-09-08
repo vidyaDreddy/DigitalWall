@@ -21,6 +21,7 @@ import com.digitalwall.services.ApiConfiguration;
 import com.digitalwall.services.JSONResult;
 import com.digitalwall.services.JSONTask;
 import com.digitalwall.utils.Preferences;
+import com.digitalwall.utils.ToolbarUtils;
 import com.digitalwall.utils.Utils;
 import com.github.pwittchen.networkevents.library.BusWrapper;
 import com.github.pwittchen.networkevents.library.ConnectivityStatus;
@@ -73,8 +74,6 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_slide);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
 
         clientId = Preferences.getStringSharedPref(this, Preferences.PREF_KEY_CLIENT_ID);
         autoCampaignId = Preferences.getStringSharedPref(this, Preferences.PREF_KEY_AUTO_CAMPAIGN_ID);
@@ -151,6 +150,7 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
         if (!Utils.isValueNullOrEmpty(autoCampaignId)) {
             ll_display_key.setVisibility(View.GONE);
             rl_main.setVisibility(View.VISIBLE);
+            getAutoCampaignData(autoCampaignId);
         } else {
             ll_display_key.setVisibility(View.VISIBLE);
             rl_main.setVisibility(View.GONE);
@@ -350,6 +350,7 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
         /*GET THE AUTO CAMPAIGN INFO*/
         if (code == ApiConfiguration.GET_AUTO_CAMPAIGN_INFO_CODE) {
             Log.v("AUTO CAMPAIGN:", "FAILED TO GET THE DETAILS");
+            getAutoCampaignData(autoCampaignId);
         }
 
         /*GET THE SCHEDULE INFO*/

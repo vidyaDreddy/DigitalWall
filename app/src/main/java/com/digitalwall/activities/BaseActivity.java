@@ -8,6 +8,7 @@ import android.view.WindowManager;
 import com.digitalwall.R;
 import com.digitalwall.utils.DeviceInfo;
 import com.digitalwall.utils.Preferences;
+import com.digitalwall.utils.ToolbarUtils;
 
 
 public class BaseActivity extends AppCompatActivity {
@@ -17,10 +18,7 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
+        ToolbarUtils.setFullScreenToolbar(this);
     }
 
 
