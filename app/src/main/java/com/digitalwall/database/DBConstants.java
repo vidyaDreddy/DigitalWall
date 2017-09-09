@@ -40,6 +40,7 @@ public class DBConstants {
     public static final String COLUMN_ASSET_DURATION = "asset_duration";
     public static final String COLUMN_ASSET_LOCAL_URL = "asset_local_url";
     public static final String COLUMN_ASSET_ANIMATION = "asset_animation";
+    public static final String COLUMN_ASSET_DOWNLOAD_ID = "asset_download_id";
 
     public static final String CHANNEL_HEIGHT = "height";
     public static final String CHANNEL_WIDTH = "width";
@@ -118,7 +119,7 @@ public class DBConstants {
             + TABLE_ASSETS
             + "("
             + COLUMN_ASSET_ID
-            + " TEXT NOT NULL PRIMARY KEY, "
+            + " TEXT NOT NULL, "
             + COLUMN_ASSET_TYPE
             + " TEXT NOT NULL, "
             + COLUMN_ASSET_URL
@@ -128,6 +129,8 @@ public class DBConstants {
             + COLUMN_ASSET_DURATION
             + " TEXT NOT NULL, "
             + COLUMN_ASSET_ANIMATION
+            + " TEXT NOT NULL, "
+            + COLUMN_ASSET_DOWNLOAD_ID
             + " TEXT NOT NULL, "
             + CHANNELS_ID
             + " TEXT NOT NULL, "

@@ -46,6 +46,9 @@ public class AssetsModel {
         if (object.has("channel_id"))
             setChannel_id(object.getString("channel_id"));
 
+        if (object.has("downloadId"))
+            setDownloadId(object.getLong("downloadId"));
+
         if (object.has("campaignAnimation"))
             setAsset_animation(object.getString("campaignAnimation"));
 
