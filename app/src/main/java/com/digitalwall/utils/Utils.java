@@ -153,10 +153,12 @@ public class Utils {
     }
 
     public static String getFileDownloadPath(String url) {
-        String dir = getSaveDir();
+
         Uri uri = Uri.parse(url);
-        String fileName = uri.getLastPathSegment();
-        return (dir + System.nanoTime() + "_" + fileName);
+        String extension = url.substring(url.lastIndexOf("."));
+        String fileName = uri.getLastPathSegment() + extension;
+        String dir = getSaveDir();
+        return (dir + "/Asset/" + System.nanoTime() + "_" + fileName);
     }
 
     public static String getSaveDir() {

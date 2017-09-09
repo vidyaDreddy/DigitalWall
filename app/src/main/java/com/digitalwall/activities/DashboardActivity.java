@@ -1,13 +1,13 @@
 package com.digitalwall.activities;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -24,8 +24,9 @@ import com.digitalwall.scheduler.SmartScheduler;
 import com.digitalwall.services.ApiConfiguration;
 import com.digitalwall.services.JSONResult;
 import com.digitalwall.services.JSONTask;
+import com.digitalwall.utils.AssetUtils;
+import com.digitalwall.utils.PlayerUtils;
 import com.digitalwall.utils.Preferences;
-import com.digitalwall.utils.ToolbarUtils;
 import com.digitalwall.utils.Utils;
 import com.github.pwittchen.networkevents.library.BusWrapper;
 import com.github.pwittchen.networkevents.library.ConnectivityStatus;
@@ -73,11 +74,25 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
     private int deviceVolume;
 
+    CampaignSource campaignSource;
+    ChannelSource channelSource;
+    public AssetsSource assetsSource;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_slide);
+
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage("Please wait player is configuring.");
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+
+        campaignSource = new CampaignSource(DashboardActivity.this);
+        channelSource = new ChannelSource(DashboardActivity.this);
+        assetsSource = new AssetsSource(DashboardActivity.this);
+
 
         clientId = Preferences.getStringSharedPref(this, Preferences.PREF_KEY_CLIENT_ID);
         autoCampaignId = Preferences.getStringSharedPref(this, Preferences.PREF_KEY_AUTO_CAMPAIGN_ID);
@@ -87,7 +102,7 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
         fetch = Fetch.newInstance(this);
         fetch.setAllowedNetwork(Fetch.NETWORK_ALL);
-        fetch.addFetchListener(this);
+        // fetch.addFetchListener(this);
 
         jobScheduler = SmartScheduler.getInstance(this);
 
@@ -152,14 +167,26 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
 
         if (!Utils.isValueNullOrEmpty(autoCampaignId)) {
+            downloadAssets(autoCampaignId);
             ll_display_key.setVisibility(View.GONE);
             rl_main.setVisibility(View.VISIBLE);
-            getAutoCampaignData(autoCampaignId);
+            if (campaignSource.isCampaignDataAvailable(autoCampaignId))
+                playAutoCampaignWithSavedData(autoCampaignId);
+            else
+                getAutoCampaignData(autoCampaignId);
         } else {
             ll_display_key.setVisibility(View.VISIBLE);
             rl_main.setVisibility(View.GONE);
         }
 
+    }
+
+    private void downloadAssets(String campaignId) {
+        assetList = assetsSource.selectAll();
+        if (assetList != null && assetList.size() > 0) {
+            AssetUtils util = new AssetUtils(this, campaignId, assetList);
+            util.setAutoCampaignDownloader();
+        }
     }
 
 
@@ -253,6 +280,12 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
 
     private void getAutoCampaignData(String campaignId) {
+
+        runOnUiThread(new Runnable() {
+            public void run() {
+                progressDialog.show();
+            }
+        });
 
 
         if (getChannelListInfo != null)
@@ -352,25 +385,49 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
      * This method is used to save data in the db
      */
     private void saveDataInDB(CampaignModel model) {
-        CampaignSource campaignSource = new CampaignSource(DashboardActivity.this);
-        ChannelSource channelSource = new ChannelSource(DashboardActivity.this);
-        AssetsSource assetsSource = new AssetsSource(DashboardActivity.this);
 
         campaignSource.insertData(model);
 
-        if (model != null && model.getChannelList() != null && model.getChannelList().size() > 0)
+        if (model.getChannelList() != null && model.getChannelList().size() > 0)
             for (int i = 0; i < model.getChannelList().size(); i++) {
                 ChannelModel channelModel = model.getChannelList().get(i);
                 channelSource.insertData(channelModel, model.getCampaignId());
-                if (channelModel != null && channelModel.getAssetsList() != null && channelModel.getAssetsList().size() > 0) {
+                if (channelModel.getAssetsList() != null && channelModel.getAssetsList().size() > 0) {
                     for (int j = 0; j < channelModel.getAssetsList().size(); j++) {
                         AssetsModel assetsModel = channelModel.getAssetsList().get(j);
                         assetsSource.insertData(assetsModel, channelModel.getChannelId());
                     }
                 }
             }
-
         Log.d("Assets Size", "Assets Size" + assetsSource.selectAll().size());
+        assetList = assetsSource.selectAll();
+        if (assetList != null && assetList.size() > 0) {
+            AssetUtils util = new AssetUtils(this, model.getCampaignId(), assetList);
+            util.setAutoCampaignDownloader();
+        }
+    }
+
+
+    public void playAutoCampaignWithSavedData(String campaignId) {
+
+        CampaignModel campaignModel = campaignSource.getCampaignByCampaignId(campaignId);
+        ArrayList<ChannelModel> mChannelList = channelSource.selectAllChannelByCampaign(campaignId);
+        if (mChannelList != null && mChannelList.size() > 0) {
+            campaignModel.setChannelList(mChannelList);
+
+            for (int i = 0; i < mChannelList.size(); i++) {
+                ChannelModel channel = mChannelList.get(i);
+                ArrayList<AssetsModel> mAssetsList = assetsSource.getAssetListByChannelId
+                        (channel.getChannelId());
+                channel.setAssetsList(mAssetsList);
+            }
+            ArrayList<ChannelModel> cList = campaignModel.getChannelList();
+            if (cList.size() > 0) {
+                ll_display_key.setVisibility(View.GONE);
+                rl_main.setVisibility(View.VISIBLE);
+                PlayerUtils.setAutoCampaignPlayerData(this, rl_main, campaignModel);
+            }
+        }
     }
 
 
