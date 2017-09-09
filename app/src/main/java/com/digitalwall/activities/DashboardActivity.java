@@ -369,6 +369,8 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
                     }
                 }
             }
+
+        Log.d("Assets Size", "Assets Size" + assetsSource.selectAll().size());
     }
 
 

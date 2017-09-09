@@ -162,4 +162,51 @@ public class AssetsSource {
         close();
         return deleteValue;
     }
+
+    /* Get all assets models */
+    public ArrayList<AssetsModel> selectAll() {
+
+        ArrayList<AssetsModel> assetsModelsList = new ArrayList<>();
+        ArrayList<String> assetsModelsIDsList = new ArrayList<>();
+
+        open();
+        Cursor cursor = mDatabase.query(DBConstants.TABLE_ASSETS, mColumns, null, null, null, null, null);
+
+        if (cursor.getCount() > 0) {
+
+            while (cursor.moveToNext()) {
+                try {
+                    if (!assetsModelsIDsList.contains(cursor.getString(cursor
+                            .getColumnIndex(DBConstants.COLUMN_ASSET_ID)))) {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("_id", cursor.getString(cursor
+                                .getColumnIndex(DBConstants.COLUMN_ASSET_ID)));
+                        jsonObject.put("duration", cursor.getString(cursor
+                                .getColumnIndex(DBConstants.COLUMN_ASSET_DURATION)));
+                        jsonObject.put("type", cursor.getString(cursor
+                                .getColumnIndex(DBConstants.COLUMN_ASSET_TYPE)));
+                        jsonObject.put("url", cursor.getString(cursor
+                                .getColumnIndex(DBConstants.COLUMN_ASSET_URL)));
+                        jsonObject.put("local_url", cursor.getString(cursor
+                                .getColumnIndex(DBConstants.COLUMN_ASSET_LOCAL_URL)));
+                        jsonObject.put("campaignAnimation", cursor.getString(cursor
+                                .getColumnIndex(DBConstants.COLUMN_ASSET_ANIMATION)));
+                        jsonObject.put("channel_id", cursor.getString(cursor
+                                .getColumnIndex(DBConstants.CHANNELS_ID)));
+
+                        AssetsModel model = new AssetsModel(jsonObject);
+                        assetsModelsIDsList.add(cursor.getString(cursor
+                                .getColumnIndex(DBConstants.COLUMN_ASSET_ID)));
+                        assetsModelsList.add(model);
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        cursor.close();
+        close();
+        return assetsModelsList;
+    }
 }
