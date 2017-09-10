@@ -76,9 +76,10 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
     private int deviceVolume;
 
-    CampaignSource campaignSource;
-    ChannelSource channelSource;
+    public CampaignSource campaignSource;
+    public ChannelSource channelSource;
     public AssetsSource assetsSource;
+    public ScheduleDb mScheduleDb;
 
 
     @Override
@@ -94,6 +95,7 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
         campaignSource = new CampaignSource(DashboardActivity.this);
         channelSource = new ChannelSource(DashboardActivity.this);
         assetsSource = new AssetsSource(DashboardActivity.this);
+        mScheduleDb = new ScheduleDb(DashboardActivity.this);
 
 
         clientId = Preferences.getStringSharedPref(this, Preferences.PREF_KEY_CLIENT_ID);
@@ -363,6 +365,8 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
                     CampaignModel model = new CampaignModel(jObject);
                     saveDataInDB(model);
                 } else {
+                    if (progressDialog.isShowing())
+                        progressDialog.dismiss();
                     ll_display_key.setVisibility(View.VISIBLE);
                     rl_main.setVisibility(View.GONE);
                 }
@@ -397,8 +401,7 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
      * This method is used to save the data
      */
     private void saveScheduleDB(ScheduleModel model) {
-        if (model != null){
-            ScheduleDb mScheduleDb = new ScheduleDb(this);
+        if (model != null) {
             mScheduleDb.insertData(model);
         }
     }
@@ -459,7 +462,8 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
         /*GET THE AUTO CAMPAIGN INFO*/
         if (code == ApiConfiguration.GET_AUTO_CAMPAIGN_INFO_CODE) {
             Log.v("AUTO CAMPAIGN:", "FAILED TO GET THE DETAILS");
-            getAutoCampaignData(autoCampaignId);
+            progressDialog.dismiss();
+            //getAutoCampaignData(autoCampaignId);
         }
 
         /*GET THE SCHEDULE INFO*/

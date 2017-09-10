@@ -34,6 +34,8 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.net.ssl.HttpsURLConnection;
+
 
 @SuppressWarnings("deprecation")
 public class JSONRawTask extends AsyncTask<Object, Integer, Object> {
@@ -82,12 +84,12 @@ public class JSONRawTask extends AsyncTask<Object, Integer, Object> {
 
 
         JSONObject resultJSON;
-        String result="";
+        String result = "";
         try {
-            HttpClient httpClient = new DefaultHttpClient();
 
-
-        switch (METHOD_TYPE)   {
+           /* URL url = new URL(SERVER_URL);
+            HttpsURLConnection httpsConn = (HttpsURLConnection) url.openConnection();
+             switch (METHOD_TYPE)   {
             case "POST":
                 HttpPost httpPost = new HttpPost(SERVER_URL);
                 httpPost.setHeader("Content-Type", "application/json");
@@ -95,8 +97,6 @@ public class JSONRawTask extends AsyncTask<Object, Integer, Object> {
                     httpPost.setHeader(HEADER_MAP.keyAt(i), HEADER_MAP.valueAt(i));
                 }
                 httpPost.setEntity(new StringEntity(INPUT_PARAMS.toString(), "UTF-8"));
-
-
                 HttpResponse response = httpClient.execute(httpPost);
                 int responseCode = response.getStatusLine().getStatusCode();
                 if (responseCode != 201 && responseCode != 200) {
@@ -108,7 +108,32 @@ public class JSONRawTask extends AsyncTask<Object, Integer, Object> {
                 result = EntityUtils.toString(response.getEntity());
                 break;
 
-        }
+        }*/
+
+
+            HttpClient httpClient = new DefaultHttpClient();
+            switch (METHOD_TYPE) {
+                case "POST":
+                    HttpPost httpPost = new HttpPost(SERVER_URL);
+                    httpPost.setHeader("Content-Type", "application/json");
+                    for (int i = 0; i < HEADER_MAP.size(); i++) {
+                        httpPost.setHeader(HEADER_MAP.keyAt(i), HEADER_MAP.valueAt(i));
+                    }
+                    httpPost.setEntity(new StringEntity(INPUT_PARAMS.toString(), "UTF-8"));
+
+
+                    HttpResponse response = httpClient.execute(httpPost);
+                    int responseCode = response.getStatusLine().getStatusCode();
+                    if (responseCode != 201 && responseCode != 200) {
+                        if (BuildConfig.DEBUG)
+                            Log.v("API CALL :", "WRONG RESPONSE CODE: " + responseCode);
+                        RESULT_MESSAGE = ERROR_MESSAGE;
+                        return null;
+                    }
+                    result = EntityUtils.toString(response.getEntity());
+                    break;
+
+            }
 
         } catch (IOException e) {
             e.printStackTrace();

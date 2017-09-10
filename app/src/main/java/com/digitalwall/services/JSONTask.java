@@ -2,6 +2,7 @@ package com.digitalwall.services;
 
 
 import android.annotation.TargetApi;
+import android.net.SSLCertificateSocketFactory;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.compat.BuildConfig;
@@ -9,7 +10,7 @@ import android.support.v4.util.ArrayMap;
 import android.util.Log;
 
 
-
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,6 +27,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.net.ssl.HttpsURLConnection;
 
 
 public class JSONTask extends AsyncTask<Object, Integer, Object> {
@@ -78,6 +81,11 @@ public class JSONTask extends AsyncTask<Object, Integer, Object> {
         try {
             url = new URL(SERVER_URL);
             connection = (HttpURLConnection) url.openConnection();
+            if (connection instanceof HttpsURLConnection) {
+                HttpsURLConnection httpsConn = (HttpsURLConnection) connection;
+                httpsConn.setSSLSocketFactory(SSLCertificateSocketFactory.getInsecure(0, null));
+                httpsConn.setHostnameVerifier(new AllowAllHostnameVerifier());
+            }
         } catch (Exception e) {
             e.printStackTrace();
             RESULT_MESSAGE = ApiConfiguration.SERVER_NOT_RESPONDING;

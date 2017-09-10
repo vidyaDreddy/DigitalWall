@@ -18,12 +18,15 @@ package com.tonyodev.fetch;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.SSLCertificateSocketFactory;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.tonyodev.fetch.exception.DownloadInterruptedException;
 import com.tonyodev.fetch.request.Header;
+
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -32,6 +35,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * FetchRunnable assists the FetchService
@@ -214,6 +219,12 @@ final class FetchRunnable implements Runnable {
 
         URL httpUrl = new URL(url);
         httpURLConnection = (HttpURLConnection) httpUrl.openConnection();
+        if (httpURLConnection instanceof HttpsURLConnection) {
+            HttpsURLConnection httpsConn = (HttpsURLConnection) httpURLConnection;
+            httpsConn.setSSLSocketFactory(SSLCertificateSocketFactory.getInsecure(0, null));
+            httpsConn.setHostnameVerifier(new AllowAllHostnameVerifier());
+        }
+
         httpURLConnection.setRequestMethod("GET");
         httpURLConnection.setReadTimeout(20_000);
         httpURLConnection.setConnectTimeout(15_000);
