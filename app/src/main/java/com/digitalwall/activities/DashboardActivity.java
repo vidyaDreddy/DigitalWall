@@ -16,9 +16,11 @@ import com.digitalwall.R;
 import com.digitalwall.database.AssetsSource;
 import com.digitalwall.database.CampaignSource;
 import com.digitalwall.database.ChannelSource;
+import com.digitalwall.database.ScheduleDb;
 import com.digitalwall.model.AssetsModel;
 import com.digitalwall.model.CampaignModel;
 import com.digitalwall.model.ChannelModel;
+import com.digitalwall.model.ScheduleModel;
 import com.digitalwall.scheduler.Job;
 import com.digitalwall.scheduler.SmartScheduler;
 import com.digitalwall.services.ApiConfiguration;
@@ -372,6 +374,16 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
         /*GET THE SCHEDULE INFO*/
         else if (code == ApiConfiguration.GET_SCHEDULE_INFO_CODE) {
             Log.v("SCHEDULE:", "FAILED TO GET THE DETAILS");
+            try {
+                JSONObject jObject = (JSONObject) result;
+                String status = jObject.optString("status");
+                if (status.equalsIgnoreCase("success")) {
+                    ScheduleModel model = new ScheduleModel(jObject);
+                    saveScheduleDB(model);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
          /*GET THE SCHEDULE CAMPAIGN INFO*/
@@ -379,6 +391,16 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
             Log.v("CAMPAIGN:", "FAILED TO GET THE DETAILS");
         }
 
+    }
+
+    /**
+     * This method is used to save the data
+     */
+    private void saveScheduleDB(ScheduleModel model) {
+        if (model != null){
+            ScheduleDb mScheduleDb = new ScheduleDb(this);
+            mScheduleDb.insertData(model);
+        }
     }
 
     /**
