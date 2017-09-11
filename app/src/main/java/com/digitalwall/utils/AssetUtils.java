@@ -109,8 +109,9 @@ public class AssetUtils implements FetchListener {
             Log.v("DOWNLOAD COMPLETED", "COUNT :" + count);
             parent.playAutoCampaignWithSavedData(campaignId);
         }
-
     }
+
+
 
 
     private long generateDownloadId(String assetId) {

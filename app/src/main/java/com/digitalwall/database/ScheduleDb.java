@@ -263,7 +263,7 @@ public class ScheduleDb {
         return deleteValue;
     }
 
-    public int deleteScheduleByJobId(String job_id) {
+    public int deleteScheduleByJobId(int job_id) {
         int deleteValue = -1;
         open();
         deleteValue = mDatabase.delete(DBConstants.TABLE_SCHEDULES, DBConstants.SCHEDULES_JOB_ID + " = ?",

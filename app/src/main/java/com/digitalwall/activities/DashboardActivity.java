@@ -1,6 +1,5 @@
 package com.digitalwall.activities;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.media.AudioManager;
 import android.os.Bundle;
@@ -27,6 +26,7 @@ import com.digitalwall.services.JSONResult;
 import com.digitalwall.services.JSONTask;
 import com.digitalwall.utils.AssetUtils;
 import com.digitalwall.utils.ChannelUtils;
+import com.digitalwall.utils.DateUtils;
 import com.digitalwall.utils.Downloader;
 import com.digitalwall.utils.PlayerUtils;
 import com.digitalwall.utils.Preferences;
@@ -47,10 +47,9 @@ import org.json.JSONObject;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 
-@SuppressWarnings("deprecation")
-@SuppressLint("SetTextI18n")
 public class DashboardActivity extends BaseActivity implements JSONResult,
         SmartScheduler.JobScheduledCallback {
 
@@ -82,7 +81,7 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
     public CampaignSource campaignSource;
     public ChannelSource channelSource;
     public AssetsSource assetsSource;
-    public ScheduleDb mScheduleDb;
+    public ScheduleDb scheduleSource;
 
 
     @Override
@@ -93,7 +92,7 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
         campaignSource = new CampaignSource(DashboardActivity.this);
         channelSource = new ChannelSource(DashboardActivity.this);
         assetsSource = new AssetsSource(DashboardActivity.this);
-        mScheduleDb = new ScheduleDb(DashboardActivity.this);
+        scheduleSource = new ScheduleDb(DashboardActivity.this);
 
 
         clientId = Preferences.getStringSharedPref(this, Preferences.PREF_KEY_CLIENT_ID);
@@ -179,7 +178,6 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
         tv_display_key = (TextView) findViewById(R.id.tv_display_key);
         tv_display_key.setTypeface(Utils.setRobotoTypeface(this));
         tv_display_key.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_font));
-        tv_display_key.setText("" + display_key);
 
         tv_reg_note = (TextView) findViewById(R.id.tv_reg_note);
         tv_reg_note.setTypeface(Utils.setRobotoTypeface(this));
@@ -187,15 +185,33 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
                 getDimension(R.dimen.text_font_small));
         tv_reg_note.setText(Utils.getStrings(this, R.string.txt_reg_note));
 
-        if (!Utils.isValueNullOrEmpty(autoCampaignId)) {
+
+        ArrayList<ScheduleModel> mSchList = scheduleSource.getAllScheduleList();
+        if (mSchList != null && mSchList.size() > 0) {
+
+            //DELETE THE OLD SCHEDULERS
+            int status = scheduleSource.deleteOldSchudules();
+            Log.v("SCHEDULER", "DELETE OLD SCHEDULES STATUS:" + status);
+
+            Log.v("SCHEDULER", "SCHEDULE'S LIST" + mSchList.size());
+        }
+
+
+        ScheduleModel scheduleModel = scheduleSource.getCurrentAvailableCampaign();
+        if (scheduleModel != null) {
+
+            playAutoCampaignWithSavedData(autoCampaignId);
+            setTheJobSchedulerData(scheduleModel);
+
+        } else if (!Utils.isValueNullOrEmpty(autoCampaignId)) {
             Utils.hideRegisterPlayerView(this);
             if (campaignSource.isCampaignDataAvailable(autoCampaignId))
                 playAutoCampaignWithSavedData(autoCampaignId);
             else
                 getAutoCampaignData(autoCampaignId);
-        } else {
+        } else
             Utils.showRegisterPlayerNoteView(this);
-        }
+
 
     }
 
@@ -285,7 +301,9 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
 
     private void deleteScheduleCampaign(JSONObject jObject) throws JSONException {
-        String scheduleId = jObject.getString("scheduleID");
+      /*  String scheduleId = jObject.getString("scheduleID");
+        int status = scheduleSource.deleteScheduleById(scheduleId);*/
+
     }
 
 
@@ -370,6 +388,7 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
                     CampaignModel model = new CampaignModel(jObject);
                     saveAutoCampaignDataInDB(model);
                 } else {
+                    Log.v("AUTO CAMPAIGN:", "RESULT FAILED :" + status);
                     Utils.showPlayerSyncFailedView(DashboardActivity.this);
                 }
             } catch (JSONException e) {
@@ -385,41 +404,69 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
                 JSONObject jObject = (JSONObject) result;
                 String status = jObject.optString("status");
                 if (status.equalsIgnoreCase("success")) {
-                    ArrayList<ScheduleModel> scheduleModels =  ChannelUtils.getScheduleCampaignModelList(jObject);
-                    saveScheduleDB(scheduleModels);
+
+                    String campaignId = jObject.optString("campaignId");
+                    if (!campaignSource.isCampaignDataAvailable(campaignId)) {
+                        getScheduleCampaignData(campaignId);
+                    }
+
+                    ArrayList<ScheduleModel> scheduleModels = ChannelUtils.
+                            getScheduleCampaignModelList(jObject);
+                    for (int i = 0; i < scheduleModels.size(); i++) {
+                        scheduleSource.insertData(scheduleModels.get(i));
+                    }
+                    scheduleTheCampaigns();
+                } else {
+                    Log.v("SCHEDULE:", "RESULT FAILED :" + status);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
 
-         /*GET THE SCHEDULE CAMPAIGN INFO*/
+        /*GET THE SCHEDULE CAMPAIGN INFO*/
         else if (code == ApiConfiguration.GET_CAMPAIGN_INFO_CODE) {
             Log.v("CAMPAIGN:", "RESULT :" + result);
             try {
                 JSONObject jObject = (JSONObject) result;
                 String status = jObject.optString("status");
                 if (status.equalsIgnoreCase("success")) {
-                    CampaignModel model = new CampaignModel(jObject);
-                    saveNormalCampaignDataInDB(model);
+                    CampaignModel campaignModel = new CampaignModel(jObject);
+                    saveNormalCampaignDataInDB(campaignModel);
+                } else {
+                    Log.v("CAMPAIGN:", "RESULT FAILED :" + status);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
-                Utils.showPlayerSyncFailedView(DashboardActivity.this);
             }
         }
 
     }
 
-    /**
-     * This method is used to save the data
-     */
-    private void saveScheduleDB(ArrayList<ScheduleModel> scheduleModels ) {
-
-        for (int i = 0; i < scheduleModels.size(); i++) {
-            mScheduleDb.insertData(scheduleModels.get(i));
-            //getScheduleCampaignData(model.getCampaignId());
+    private void scheduleTheCampaigns() {
+        ArrayList<ScheduleModel> mList = scheduleSource.getAllScheduleList();
+        if (mList != null && mList.size() > 0) {
+            for (int i = 0; i < mList.size(); i++) {
+                ScheduleModel model = mList.get(i);
+                setTheJobSchedulerData(model);
+            }
         }
+    }
+
+
+    private void setTheJobSchedulerData(ScheduleModel model) {
+
+        /*SCHEDULE THE EVENT WITH START TIME*/
+        Calendar sCal = DateUtils.getCalendarDate(model.getStartDate(), model.getsTime());
+        initilizeScheduler(model.getJobid(), model.getCampaignId(),
+                Preferences.CAMPAIGN_SCHEDULE,
+                sCal.getTimeInMillis(), model.getJobid(), model.getId());
+
+        //*SCHEDULE THE EVENT WITH END TIME*//*
+      /*  Calendar eCal = DateUtils.getCalendarDate(model.getEndDate(), model.geteTime());
+        int eJobId = model.getJobid() + 12;
+        initilizeScheduler(eJobId, autoCampaignId,
+                Preferences.CAMPAIGN_AUTO, eCal.getTimeInMillis(), model.getJobid(), model.getId());*/
     }
 
     private void saveNormalCampaignDataInDB(CampaignModel model) {
@@ -483,12 +530,34 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
                 channel.setAssetsList(mAssetsList);
             }
             ArrayList<ChannelModel> cList = campaignModel.getChannelList();
-            if (cList.size() > 0) {
+            if (cList != null && cList.size() > 0) {
                 ll_display_key.setVisibility(View.GONE);
                 rl_main.setVisibility(View.VISIBLE);
                 PlayerUtils.setAutoCampaignPlayerData(this, rl_main, campaignModel);
             }
         }
+    }
+
+
+    public void playAScheduleCampaign(String campaignId) {
+
+        CampaignModel campaignModel = campaignSource.getCampaignByCampaignId(campaignId);
+        if (campaignModel != null) {
+
+            ArrayList<ChannelModel> mChannelList = channelSource.selectAllChannelByCampaign(campaignId);
+            if (mChannelList != null && mChannelList.size() > 0) {
+                campaignModel.setChannelList(mChannelList);
+
+                for (int i = 0; i < mChannelList.size(); i++) {
+                    ChannelModel channel = mChannelList.get(i);
+                    ArrayList<AssetsModel> mAssetsList = assetsSource.getAssetListByChannelId
+                            (channel.getChannelId());
+                    channel.setAssetsList(mAssetsList);
+                }
+                PlayerUtils.setAutoCampaignPlayerData(this, rl_main, campaignModel);
+            }
+        }
+
     }
 
 
@@ -513,16 +582,17 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
     }
 
 
-    private void setSchedulerPlayer(int JOB_ID, String campaignId, String tag, long time, String scheduleId) {
+    private void initilizeScheduler(int JOB_ID, String campaignId, String tag,
+                                    long time, int JobEId, String scheduleId) {
 
         // Check if any periodic job is currently scheduled
         if (jobScheduler.contains(JOB_ID)) {
             jobScheduler.removeJob(JOB_ID);
             return;
         }
-
+        String jOBENDID = String.valueOf(JobEId);
         /*JOB CREATED*/
-        Job.Builder builder = new Job.Builder(JOB_ID, campaignId, this, tag, clientId, scheduleId)
+        Job.Builder builder = new Job.Builder(JOB_ID, campaignId, this, tag, jOBENDID, scheduleId)
                 .setIntervalMillis(time);
 
         Job job = builder.build();
@@ -544,9 +614,31 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
     private void navigateToScheduleScreen(final Job job) {
 
         if (job != null) {
+            int jobId = job.getJobId();
+            int jobRefId = Integer.valueOf(job.getJobClientId());
             String campaignId = job.getJobCampaignId();
             String scheduleId = job.getJobScheduleId();
             String type = job.getPeriodicTaskTag();
+
+            switch (type) {
+                case Preferences.CAMPAIGN_AUTO:
+                    Log.v("SCHEDULER", "ENDED");
+
+                    playAutoCampaignWithSavedData(autoCampaignId);
+                    int status = scheduleSource.deleteScheduleByJobId(jobRefId);
+                    if (status == -1)
+                        Log.v("SCHEDULER", " FAILED TO DELETED");
+                    else
+                        Log.v("SCHEDULER", "DELETED");
+
+                    break;
+                case Preferences.CAMPAIGN_SCHEDULE:
+                    Log.v("SCHEDULER", "STARTED");
+                    if (campaignSource.isCampaignDataAvailable(campaignId)) {
+                        playAScheduleCampaign(campaignId);
+                    }
+                    break;
+            }
         }
     }
 
