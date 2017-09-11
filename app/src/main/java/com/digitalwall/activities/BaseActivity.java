@@ -14,7 +14,6 @@ import com.digitalwall.utils.ToolbarUtils;
 
 public class BaseActivity extends AppCompatActivity {
 
-    public ProgressDialog progressDialog = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

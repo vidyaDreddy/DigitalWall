@@ -19,17 +19,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
+        android:background="@color/blue_bg"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tv_display_key_label"
+            android:id="@+id/tv_digital_wall_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:text="@string/txt_license_key"
-            android:textColor="@color/light_vol" />
+            android:text="@string/app_name"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_font_label" />
 
         <TextView
             android:id="@+id/tv_display_key"
@@ -37,7 +39,21 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:textColor="@color/think_vol" />
+            android:layout_marginTop="@dimen/_30dp"
+            android:layout_marginBottom="@dimen/_30dp"
+            android:text="@string/txt_license_key"
+            android:textColor="@color/yellow"
+            android:textSize="@dimen/text_font" />
+
+        <TextView
+            android:id="@+id/tv_reg_note"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="@string/txt_reg_note"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_font_small" />
 
 
     </LinearLayout>

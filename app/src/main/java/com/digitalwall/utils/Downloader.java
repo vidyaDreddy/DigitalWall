@@ -1,16 +1,9 @@
 package com.digitalwall.utils;
 
-import android.net.Uri;
-import android.os.Environment;
 import android.util.Log;
-import android.view.View;
 
 import com.digitalwall.activities.DashboardActivity;
-import com.digitalwall.database.AssetsSource;
-import com.digitalwall.database.ChannelSource;
 import com.digitalwall.model.AssetsModel;
-import com.digitalwall.model.CampaignModel;
-import com.digitalwall.model.ChannelModel;
 import com.tonyodev.fetch.Fetch;
 import com.tonyodev.fetch.listener.FetchListener;
 import com.tonyodev.fetch.request.Request;
@@ -21,27 +14,24 @@ import java.util.ArrayList;
 
 /**
  * Created by vidhayadhar
- * on 08/09/17.
+ * on 10/09/17.
  */
 
-public class AssetUtils implements FetchListener {
-
+public class Downloader implements FetchListener {
     private DashboardActivity parent;
     private int count;
 
     private ArrayList<AssetsModel> assetList;
-    private String campaignId;
 
 
-    public AssetUtils(DashboardActivity parent, String campaignId, ArrayList<AssetsModel> assetList) {
+    public Downloader(DashboardActivity parent, ArrayList<AssetsModel> assetList) {
         this.parent = parent;
-        this.campaignId = campaignId;
         this.assetList = assetList;
         parent.fetch.addFetchListener(this);
     }
 
 
-    public void setAutoCampaignDownloader() {
+    public void setAssetDownloader() {
 
         for (int i = 0; i < assetList.size(); i++) {
             AssetsModel asset = assetList.get(i);
@@ -58,9 +48,10 @@ public class AssetUtils implements FetchListener {
             if (info != null) {
                 File file = new File(info.getFilePath());
                 if (file.exists()) {
-                    if (info.getProgress() == 100)
+                    if (info.getProgress() == 100) {
                         count++;
-                    else
+                        //assetList.remove(i);
+                    } else
                         parent.fetch.retry(assetDownId);
                 } else {
                     parent.fetch.remove(assetDownId);
@@ -73,7 +64,6 @@ public class AssetUtils implements FetchListener {
 
         if (count == assetList.size()) {
             Log.v("DOWNLOAD COMPLETED", "COUNT :" + count);
-            parent.playAutoCampaignWithSavedData(campaignId);
         }
     }
 
@@ -94,7 +84,7 @@ public class AssetUtils implements FetchListener {
                 parent.fetch.retry(id);
                 break;
             case Fetch.STATUS_DOWNLOADING:
-                Log.i("DOWNLOADING", "ASSET ID:" + id + " Pro" + progress);
+                Log.i("DOWNLOADING", "ASSET ID:" + id + " Pro:" + progress);
                 break;
             case Fetch.STATUS_DONE:
                 Log.i("DOWNLOADED", "ASSET ID:" + id);
@@ -104,12 +94,10 @@ public class AssetUtils implements FetchListener {
 
         float per = (count / assetList.size()) * 100;
         if (per < 100)
-            Log.v("DOWNLOAD", " DOWNLOADED [" + count + "/" + assetList.size() + "]");
+            Log.i("DOWNLOAD", " DOWNLOADED [" + count + "/" + assetList.size() + "]");
         else {
-            Log.v("DOWNLOAD COMPLETED", "COUNT :" + count);
-            parent.playAutoCampaignWithSavedData(campaignId);
+            Log.i("DOWNLOAD COMPLETED", "COUNT :" + count);
         }
-
     }
 
 
@@ -117,5 +105,5 @@ public class AssetUtils implements FetchListener {
         int code = assetId.hashCode();
         return (long) code;
     }
-}
 
+}

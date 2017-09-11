@@ -1,7 +1,6 @@
 package com.digitalwall.activities;
 
 import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.media.AudioManager;
 import android.os.Bundle;
@@ -27,6 +26,7 @@ import com.digitalwall.services.ApiConfiguration;
 import com.digitalwall.services.JSONResult;
 import com.digitalwall.services.JSONTask;
 import com.digitalwall.utils.AssetUtils;
+import com.digitalwall.utils.Downloader;
 import com.digitalwall.utils.PlayerUtils;
 import com.digitalwall.utils.Preferences;
 import com.digitalwall.utils.Utils;
@@ -39,7 +39,6 @@ import com.mixpanel.android.java_websocket.handshake.ServerHandshake;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import com.tonyodev.fetch.Fetch;
-import com.tonyodev.fetch.listener.FetchListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,7 +51,7 @@ import java.util.ArrayList;
 @SuppressWarnings("deprecation")
 @SuppressLint("SetTextI18n")
 public class DashboardActivity extends BaseActivity implements JSONResult,
-        SmartScheduler.JobScheduledCallback, FetchListener {
+        SmartScheduler.JobScheduledCallback {
 
     private JSONTask getChannelListInfo;
     public WebSocketClient webSocketClient;
@@ -60,8 +59,11 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
     private BusWrapper busWrapper;
     private NetworkEvents networkEvents;
 
-    private LinearLayout ll_display_key;
-    private RelativeLayout rl_main;
+    public LinearLayout ll_display_key;
+    public RelativeLayout rl_main;
+    public TextView tv_display_key;
+    public TextView tv_reg_note;
+
 
     private AudioManager mAudioManager;
     private SmartScheduler jobScheduler;
@@ -86,11 +88,6 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_slide);
-
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setCancelable(false);
-        progressDialog.setMessage("Please wait player is configuring.");
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 
         campaignSource = new CampaignSource(DashboardActivity.this);
         channelSource = new ChannelSource(DashboardActivity.this);
@@ -137,12 +134,23 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
     @Subscribe
     public void onEvent(ConnectivityChanged event) {
-
         ConnectivityStatus wifiStatus = event.getConnectivityStatus();
         if (wifiStatus == ConnectivityStatus.WIFI_CONNECTED_HAS_INTERNET ||
                 wifiStatus == ConnectivityStatus.MOBILE_CONNECTED) {
             if (webSocketClient != null && webSocketClient.isClosed())
                 connectWithWebSocket();
+
+            /*DOWNLOAD ASSETS*/
+            downloadAssetsInBackground();
+        }
+    }
+
+    /*ALL ASSETS DOWNLOADED IN BACKGROUND*/
+    private void downloadAssetsInBackground() {
+        assetList = assetsSource.selectAll();
+        if (assetList != null && assetList.size() > 0) {
+            Downloader downloader = new Downloader(this, assetList);
+            downloader.setAssetDownloader();
         }
     }
 
@@ -160,37 +168,34 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
         ll_display_key = (LinearLayout) findViewById(R.id.ll_display_key);
         ll_display_key.setVisibility(View.GONE);
 
+        /*DIGITAL WALL  LABEL*/
+        TextView tv_digital_wall_label = (TextView) findViewById(R.id.tv_digital_wall_label);
+        tv_digital_wall_label.setTypeface(Utils.setRobotoTypeface(this));
+        tv_digital_wall_label.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                getResources().getDimension(R.dimen.text_font_label));
+
         /*DISPLAY KEY*/
-        TextView tv_display_key = (TextView) findViewById(R.id.tv_display_key);
+        tv_display_key = (TextView) findViewById(R.id.tv_display_key);
+        tv_display_key.setTypeface(Utils.setRobotoTypeface(this));
         tv_display_key.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_font));
         tv_display_key.setText("" + display_key);
 
-        /*DISPLAY KEY LABEL*/
-        TextView tv_display_key_label = (TextView) findViewById(R.id.tv_display_key_label);
-        tv_display_key_label.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_font));
-
+        tv_reg_note = (TextView) findViewById(R.id.tv_reg_note);
+        tv_reg_note.setTypeface(Utils.setRobotoTypeface(this));
+        tv_reg_note.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().
+                getDimension(R.dimen.text_font_small));
+        tv_reg_note.setText(Utils.getStrings(this, R.string.txt_reg_note));
 
         if (!Utils.isValueNullOrEmpty(autoCampaignId)) {
-            downloadAssets(autoCampaignId);
-            ll_display_key.setVisibility(View.GONE);
-            rl_main.setVisibility(View.VISIBLE);
+            Utils.hideRegisterPlayerView(this);
             if (campaignSource.isCampaignDataAvailable(autoCampaignId))
                 playAutoCampaignWithSavedData(autoCampaignId);
             else
                 getAutoCampaignData(autoCampaignId);
         } else {
-            ll_display_key.setVisibility(View.VISIBLE);
-            rl_main.setVisibility(View.GONE);
+            Utils.showRegisterPlayerNoteView(this);
         }
 
-    }
-
-    private void downloadAssets(String campaignId) {
-        assetList = assetsSource.selectAll();
-        if (assetList != null && assetList.size() > 0) {
-            AssetUtils util = new AssetUtils(this, campaignId, assetList);
-            util.setAutoCampaignDownloader();
-        }
     }
 
 
@@ -287,7 +292,7 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
         runOnUiThread(new Runnable() {
             public void run() {
-                progressDialog.show();
+                Utils.showPlayerSyncView(DashboardActivity.this);
             }
         });
 
@@ -331,7 +336,7 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
     }
 
 
-    private void getScheduleCampaignData(String clientId, String campaignId) {
+    private void getScheduleCampaignData(String campaignId) {
 
         if (getChannelListInfo != null)
             getChannelListInfo.cancel(true);
@@ -360,18 +365,14 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
                 JSONObject jObject = (JSONObject) result;
                 String status = jObject.optString("status");
                 if (status.equalsIgnoreCase("success")) {
-                    ll_display_key.setVisibility(View.GONE);
-                    rl_main.setVisibility(View.VISIBLE);
                     CampaignModel model = new CampaignModel(jObject);
                     saveDataInDB(model);
                 } else {
-                    if (progressDialog.isShowing())
-                        progressDialog.dismiss();
-                    ll_display_key.setVisibility(View.VISIBLE);
-                    rl_main.setVisibility(View.GONE);
+                    Utils.showPlayerSyncFailedView(DashboardActivity.this);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
+                Utils.showPlayerSyncFailedView(DashboardActivity.this);
             }
         }
 
@@ -401,9 +402,10 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
      * This method is used to save the data
      */
     private void saveScheduleDB(ScheduleModel model) {
-        if (model != null) {
-            mScheduleDb.insertData(model);
-        }
+
+        mScheduleDb.insertData(model);
+        getScheduleCampaignData(model.getCampaignId());
+
     }
 
     /**
@@ -413,11 +415,11 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
         campaignSource.insertData(model);
 
-        if (model.getChannelList() != null && model.getChannelList().size() > 0)
+        if (model.getChannelList().size() > 0)
             for (int i = 0; i < model.getChannelList().size(); i++) {
                 ChannelModel channelModel = model.getChannelList().get(i);
                 channelSource.insertData(channelModel, model.getCampaignId());
-                if (channelModel.getAssetsList() != null && channelModel.getAssetsList().size() > 0) {
+                if (channelModel.getAssetsList().size() > 0) {
                     for (int j = 0; j < channelModel.getAssetsList().size(); j++) {
                         AssetsModel assetsModel = channelModel.getAssetsList().get(j);
                         assetsSource.insertData(assetsModel, channelModel.getChannelId());
@@ -434,6 +436,8 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
 
     public void playAutoCampaignWithSavedData(String campaignId) {
+
+        Utils.hideRegisterPlayerView(DashboardActivity.this);
 
         CampaignModel campaignModel = campaignSource.getCampaignByCampaignId(campaignId);
         ArrayList<ChannelModel> mChannelList = channelSource.selectAllChannelByCampaign(campaignId);
@@ -462,8 +466,7 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
         /*GET THE AUTO CAMPAIGN INFO*/
         if (code == ApiConfiguration.GET_AUTO_CAMPAIGN_INFO_CODE) {
             Log.v("AUTO CAMPAIGN:", "FAILED TO GET THE DETAILS");
-            progressDialog.dismiss();
-            //getAutoCampaignData(autoCampaignId);
+            getAutoCampaignData(autoCampaignId);
         }
 
         /*GET THE SCHEDULE INFO*/
@@ -478,8 +481,7 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
     }
 
 
-    private void setSchedulerPlayer(int JOB_ID, String campaignId, String clientId,
-                                    String tag, long time, String scheduleId) {
+    private void setSchedulerPlayer(int JOB_ID, String campaignId, String tag, long time, String scheduleId) {
 
         // Check if any periodic job is currently scheduled
         if (jobScheduler.contains(JOB_ID)) {
@@ -511,27 +513,9 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
         if (job != null) {
             String campaignId = job.getJobCampaignId();
-            String clientId = job.getJobClientId();
             String scheduleId = job.getJobScheduleId();
             String type = job.getPeriodicTaskTag();
         }
-    }
-
-    @Override
-    public void onUpdate(long id, int status, int progress, long downloadedBytes, long fileSize, int error) {
-        switch (status) {
-            case Fetch.STATUS_ERROR:
-                Log.i("DOWNLOAD ERROR", "ASSET ID:" + id);
-                fetch.retry(id);
-                break;
-            case Fetch.STATUS_DOWNLOADING:
-                Log.i("DOWNLOADING", "ASSET ID:" + id + " Pro" + progress);
-                break;
-            case Fetch.STATUS_DONE:
-                Log.i("DOWNLOADED", "ASSET ID:" + id);
-                break;
-        }
-
     }
 
     @Override

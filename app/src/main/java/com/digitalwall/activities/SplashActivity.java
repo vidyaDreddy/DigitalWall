@@ -46,12 +46,14 @@ public class SplashActivity extends BaseActivity implements JSONResult {
         ImageLoader.getInstance().displayImage("drawable://" + R.drawable.login, iv_bg);
 
         TextView tv_digital_label = (TextView) findViewById(R.id.tv_digital_label);
+        tv_digital_label.setTypeface(Utils.setRobotoTypeface(this));
         tv_digital_label.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                getResources().getDimension(R.dimen.text_font));
+                getResources().getDimension(R.dimen.text_font_label));
 
         TextView tv_wall_label = (TextView) findViewById(R.id.tv_wall_label);
+        tv_wall_label.setTypeface(Utils.setRobotoTypeface(this));
         tv_wall_label.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                getResources().getDimension(R.dimen.text_font));
+                getResources().getDimension(R.dimen.text_font_label));
 
 
         if (Utils.isMarshmallowOS()) {

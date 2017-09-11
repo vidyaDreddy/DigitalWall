@@ -5,4 +5,12 @@
     <string name="txt_digital">Digital</string>
     <string name="txt_wall">Wall</string>
     <string name="txt_license_key">License Key:</string>
+    <string name="txt_player_reg_successfully">Player Registered successfully..!</string>
+    <string name="txt_reg_note">Please use this key to register
+        your player at https://digitalwall.in</string>
+    <string name="txt_auto_campaign_sync_note">Please wait auto campaign content
+        syncing in progress.</string>
+    <string name="txt_auto_campaign_sync_failed">Failed to sync the Player Data Please try again later</string>
+
+
 </resources>

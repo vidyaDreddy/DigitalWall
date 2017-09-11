@@ -1,7 +1,9 @@
 package com.digitalwall.utils;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -12,7 +14,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 
+import com.digitalwall.R;
 import com.digitalwall.activities.BaseActivity;
+import com.digitalwall.activities.DashboardActivity;
 import com.digitalwall.model.TileModel;
 import com.digitalwall.model.LayoutModel;
 import com.digitalwall.views.SliderLayout;
@@ -164,6 +168,40 @@ public class Utils {
     public static String getSaveDir() {
         return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                 .toString() + "/DigitalWall";
+    }
+
+    /**
+     * ARIAL REGULAR
+     **/
+    public static Typeface setRobotoTypeface(Context context) {
+        return Typeface.createFromAsset(context.getAssets(), "fonts/Roboto-Regular_0.ttf");
+    }
+
+    @SuppressLint("SetTextI18n")
+    public static void showRegisterPlayerNoteView(DashboardActivity parent) {
+        parent.ll_display_key.setVisibility(View.VISIBLE);
+        parent.rl_main.setVisibility(View.GONE);
+        parent.tv_reg_note.setText(Utils.getStrings(parent, R.string.txt_reg_note));
+        parent.tv_display_key.setText(Utils.getStrings(parent,R.string.txt_license_key)+ parent.display_key);
+    }
+
+    public static void showPlayerSyncView(DashboardActivity parent) {
+        parent.ll_display_key.setVisibility(View.VISIBLE);
+        parent.rl_main.setVisibility(View.GONE);
+        parent.tv_reg_note.setText(Utils.getStrings(parent, R.string.txt_auto_campaign_sync_note));
+        parent.tv_display_key.setText(Utils.getStrings(parent, R.string.txt_player_reg_successfully));
+    }
+    public static void showPlayerSyncFailedView(DashboardActivity parent) {
+        parent.ll_display_key.setVisibility(View.VISIBLE);
+        parent.rl_main.setVisibility(View.GONE);
+        parent.tv_reg_note.setText(Utils.getStrings(parent, R.string.txt_auto_campaign_sync_failed));
+        parent.tv_display_key.setText(Utils.getStrings(parent, R.string.txt_player_reg_successfully));
+    }
+
+
+    public static void hideRegisterPlayerView(DashboardActivity parent) {
+        parent.ll_display_key.setVisibility(View.GONE);
+        parent.rl_main.setVisibility(View.VISIBLE);
     }
 
 }

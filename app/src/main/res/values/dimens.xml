@@ -7,8 +7,10 @@
     <dimen name="_40sp">40sp</dimen>
     <dimen name="fab_margin">16dp</dimen>
 
-    <dimen name="text_font">30dp</dimen>
-
+    <dimen name="text_font">30sp</dimen>
+    <dimen name="text_font_small">20sp</dimen>
+    <dimen name="text_font_label">35sp</dimen>
+    <dimen name="_30dp">30dp</dimen>
 
 
     result_font

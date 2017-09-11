@@ -134,10 +134,6 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
         /*DISPLAY KEY TEXT_VIEW*/
         ll_display_key = (LinearLayout) findViewById(R.id.ll_display_key);
         ll_display_key.setVisibility(View.GONE);
-        TextView tv_display_key = (TextView) findViewById(R.id.tv_display_key);
-        tv_display_key.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_font));
-        TextView tv_display_key_label = (TextView) findViewById(R.id.tv_display_key_label);
-        tv_display_key_label.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_font));
 
 
         final ScheduleModel scheduleModel = schedulesDB.getCurrentAviableCampaign();
@@ -155,7 +151,6 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
 
         } else {
             ll_display_key.setVisibility(View.VISIBLE);
-            tv_display_key.setText(" " + display_key);
         }
 
         /*CONNECT WITH WEB SOCKET*/
