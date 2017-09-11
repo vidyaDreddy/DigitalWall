@@ -38,11 +38,12 @@ public class ChannelUtils {
 
             mScheduleCampaignModelJson.put("_id", jsonObject.optString("_id"));
             mScheduleCampaignModelJson.put("campaignId", jsonObject.optString("campaignId"));
-            mScheduleCampaignModelJson.put("jobId", DeviceInfo.randomJobId());
             mScheduleCampaignModelJson.put("startDate", mScheduleCampaignModelJson.optString("startDate"));
             mScheduleCampaignModelJson.put("endDate", mScheduleCampaignModelJson.optString("endDate"));
             mScheduleCampaignModelJson.put("sTime", mScheduleCampaignModelJson.optString("startTime"));
             mScheduleCampaignModelJson.put("eTime", mScheduleCampaignModelJson.optString("endTime"));
+            mScheduleCampaignModelJson.put("jobId", DateUtils.getCalendarDate(mScheduleCampaignModelJson.optString("startDate"),
+                    mScheduleCampaignModelJson.optString("startTime")).getTimeInMillis());
             mScheduleCampaignModelJson.put("startTime", DateUtils.
                     convertTimeToSeconds(mScheduleCampaignModelJson.optString("startTime")));
             mScheduleCampaignModelJson.put("endTime", DateUtils.

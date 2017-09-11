@@ -167,7 +167,7 @@ public class ScheduleDb {
         return campaignList;
     }
 
-    public ScheduleModel getCurrentAviableCampaign() {
+    public ScheduleModel getCurrentAvailableCampaign() {
 
         ScheduleModel scheduleModel = null;
         open();

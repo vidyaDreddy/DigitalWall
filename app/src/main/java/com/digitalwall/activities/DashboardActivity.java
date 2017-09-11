@@ -26,6 +26,7 @@ import com.digitalwall.services.ApiConfiguration;
 import com.digitalwall.services.JSONResult;
 import com.digitalwall.services.JSONTask;
 import com.digitalwall.utils.AssetUtils;
+import com.digitalwall.utils.ChannelUtils;
 import com.digitalwall.utils.Downloader;
 import com.digitalwall.utils.PlayerUtils;
 import com.digitalwall.utils.Preferences;
@@ -384,8 +385,8 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
                 JSONObject jObject = (JSONObject) result;
                 String status = jObject.optString("status");
                 if (status.equalsIgnoreCase("success")) {
-                    ScheduleModel model = new ScheduleModel(jObject);
-                    saveScheduleDB(model);
+                    ArrayList<ScheduleModel> scheduleModels =  ChannelUtils.getScheduleCampaignModelList(jObject);
+                    saveScheduleDB(scheduleModels);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -413,11 +414,12 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
     /**
      * This method is used to save the data
      */
-    private void saveScheduleDB(ScheduleModel model) {
+    private void saveScheduleDB(ArrayList<ScheduleModel> scheduleModels ) {
 
-        mScheduleDb.insertData(model);
-        getScheduleCampaignData(model.getCampaignId());
-
+        for (int i = 0; i < scheduleModels.size(); i++) {
+            mScheduleDb.insertData(scheduleModels.get(i));
+            //getScheduleCampaignData(model.getCampaignId());
+        }
     }
 
     private void saveNormalCampaignDataInDB(CampaignModel model) {

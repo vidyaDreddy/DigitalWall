@@ -6,12 +6,10 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.digitalwall.R;
 import com.digitalwall.database.AssetsSource;
@@ -136,7 +134,7 @@ public class PlayerActivity extends BaseActivity implements JSONResult,
         ll_display_key.setVisibility(View.GONE);
 
 
-        final ScheduleModel scheduleModel = schedulesDB.getCurrentAviableCampaign();
+        final ScheduleModel scheduleModel = schedulesDB.getCurrentAvailableCampaign();
         if (scheduleModel != null) {
 
             createCampaignPlayer(autoCampaignId);
