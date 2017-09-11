@@ -263,6 +263,29 @@ public class ScheduleDb {
         return deleteValue;
     }
 
+    public int deleteScheduleByJobId(String job_id) {
+        int deleteValue = -1;
+        open();
+        deleteValue = mDatabase.delete(DBConstants.TABLE_SCHEDULES, DBConstants.SCHEDULES_JOB_ID + " = ?",
+                new String[]{"" + job_id});
+        close();
+        return deleteValue;
+    }
+
+    public int deleteOldSchudules() {
+        Date today = new Date();
+        SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String date = DATE_FORMAT.format(today);
+        Log.d("currentDate", ",,,,,,,,," + date);
+
+        int deleteValue = -1;
+        open();
+        deleteValue = mDatabase.delete(DBConstants.TABLE_SCHEDULES, DBConstants.SCHEDULES_START_DATE + "< ?",
+                new String[]{"" + date});
+        close();
+        return deleteValue;
+    }
+
     public int deleteAllSchedules() {
         int deleteValue = -1;
         open();
