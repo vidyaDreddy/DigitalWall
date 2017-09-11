@@ -362,11 +362,12 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
         /*GET THE AUTO CAMPAIGN INFO*/
         if (code == ApiConfiguration.GET_AUTO_CAMPAIGN_INFO_CODE) {
             try {
+                Log.v("AUTO CAMPAIGN:", "RESULT :" + result);
                 JSONObject jObject = (JSONObject) result;
                 String status = jObject.optString("status");
                 if (status.equalsIgnoreCase("success")) {
                     CampaignModel model = new CampaignModel(jObject);
-                    saveDataInDB(model);
+                    saveAutoCampaignDataInDB(model);
                 } else {
                     Utils.showPlayerSyncFailedView(DashboardActivity.this);
                 }
@@ -378,7 +379,7 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
         /*GET THE SCHEDULE INFO*/
         else if (code == ApiConfiguration.GET_SCHEDULE_INFO_CODE) {
-            Log.v("SCHEDULE:", "FAILED TO GET THE DETAILS");
+            Log.v("SCHEDULE:", "RESULT :" + result);
             try {
                 JSONObject jObject = (JSONObject) result;
                 String status = jObject.optString("status");
@@ -393,7 +394,18 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
          /*GET THE SCHEDULE CAMPAIGN INFO*/
         else if (code == ApiConfiguration.GET_CAMPAIGN_INFO_CODE) {
-            Log.v("CAMPAIGN:", "FAILED TO GET THE DETAILS");
+            Log.v("CAMPAIGN:", "RESULT :" + result);
+            try {
+                JSONObject jObject = (JSONObject) result;
+                String status = jObject.optString("status");
+                if (status.equalsIgnoreCase("success")) {
+                    CampaignModel model = new CampaignModel(jObject);
+                    saveNormalCampaignDataInDB(model);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Utils.showPlayerSyncFailedView(DashboardActivity.this);
+            }
         }
 
     }
@@ -408,10 +420,28 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
     }
 
+    private void saveNormalCampaignDataInDB(CampaignModel model) {
+        campaignSource.insertData(model);
+        if (model.getChannelList().size() > 0)
+            for (int i = 0; i < model.getChannelList().size(); i++) {
+                ChannelModel channelModel = model.getChannelList().get(i);
+                channelSource.insertData(channelModel, model.getCampaignId());
+                if (channelModel.getAssetsList().size() > 0) {
+                    for (int j = 0; j < channelModel.getAssetsList().size(); j++) {
+                        AssetsModel assetsModel = channelModel.getAssetsList().get(j);
+                        assetsSource.insertData(assetsModel, channelModel.getChannelId());
+                    }
+                }
+            }
+        Log.d("Assets Size", "Assets Size" + assetsSource.selectAll().size());
+        downloadAssetsInBackground();
+    }
+
+
     /**
      * This method is used to save data in the db
      */
-    private void saveDataInDB(CampaignModel model) {
+    private void saveAutoCampaignDataInDB(CampaignModel model) {
 
         campaignSource.insertData(model);
 
