@@ -103,7 +103,6 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
         fetch = Fetch.newInstance(this);
         fetch.setAllowedNetwork(Fetch.NETWORK_ALL);
-        // fetch.addFetchListener(this);
 
         jobScheduler = SmartScheduler.getInstance(this);
 
@@ -243,7 +242,7 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
                                 configureScheduleCampaign(jObject);
                                 break;
                             case "SCHEDULEDELETED":
-                                deleteScheduleCampaign(jObject);
+                                deleteCurrentScheduledCampaign(jObject);
                                 break;
                         }
                     } catch (JSONException e) {
@@ -301,8 +300,36 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
 
     private void deleteScheduleCampaign(JSONObject jObject) throws JSONException {
-      /*  String scheduleId = jObject.getString("scheduleID");
-        int status = scheduleSource.deleteScheduleById(scheduleId);*/
+        String scheduleId = jObject.getString("scheduleID");
+        int status = scheduleSource.deleteScheduleById(scheduleId);
+        Log.v("SCHEDULER", "DELETED SCHEDULE STATUS:" + status);
+
+    }
+
+    private void deleteCurrentScheduledCampaign(JSONObject jObject) throws JSONException {
+        String scheduleId = jObject.getString("scheduleID");
+
+        ArrayList<ScheduleModel> mSchList = scheduleSource.getAllScheduleList();
+        ArrayList<ScheduleModel> newList = new ArrayList<>();
+        if (mSchList.size() > 0) {
+            for (int i = 0; i < mSchList.size(); i++) {
+                ScheduleModel model = mSchList.get(i);
+                String schId = model.getId();
+                if (schId.equalsIgnoreCase(scheduleId)) {
+                    newList.add(model);
+                }
+            }
+        }
+
+        /*DELETE THE ALL THE SCHEDULES*/
+        for (int i = 0; i < newList.size(); i++) {
+            ScheduleModel model = newList.get(i);
+            jobScheduler.removeJob(model.getJobid());
+            jobScheduler.removeJob(model.getJobid() + 12);
+        }
+        int status = scheduleSource.deleteScheduleById(scheduleId);
+        Log.v("SCHEDULER", "DELETED SCHEDULE STATUS:" + status);
+
 
     }
 
@@ -446,6 +473,7 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
     private void scheduleTheCampaigns() {
         ArrayList<ScheduleModel> mList = scheduleSource.getAllScheduleList();
         if (mList != null && mList.size() > 0) {
+            Log.v("SCHEDULE:", "SECHDULE LIST:" + mList.size());
             for (int i = 0; i < mList.size(); i++) {
                 ScheduleModel model = mList.get(i);
                 setTheJobSchedulerData(model);
@@ -463,10 +491,10 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
                 sCal.getTimeInMillis(), model.getJobid(), model.getId());
 
         //*SCHEDULE THE EVENT WITH END TIME*//*
-      /*  Calendar eCal = DateUtils.getCalendarDate(model.getEndDate(), model.geteTime());
+        Calendar eCal = DateUtils.getCalendarDate(model.getEndDate(), model.geteTime());
         int eJobId = model.getJobid() + 12;
         initilizeScheduler(eJobId, autoCampaignId,
-                Preferences.CAMPAIGN_AUTO, eCal.getTimeInMillis(), model.getJobid(), model.getId());*/
+                Preferences.CAMPAIGN_AUTO, eCal.getTimeInMillis(), model.getJobid(), model.getId());
     }
 
     private void saveNormalCampaignDataInDB(CampaignModel model) {

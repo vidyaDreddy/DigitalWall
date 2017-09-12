@@ -25,6 +25,8 @@ public class Downloader implements FetchListener {
 
 
     public Downloader(DashboardActivity parent, ArrayList<AssetsModel> assetList) {
+
+        Log.v("DOWNLOADER ASSETS:", "ASSET LIST:" + assetList.size());
         this.parent = parent;
         this.assetList = assetList;
         parent.fetch.addFetchListener(this);

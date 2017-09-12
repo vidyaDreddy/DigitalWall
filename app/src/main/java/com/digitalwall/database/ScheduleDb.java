@@ -14,8 +14,10 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * Created by Shankar
@@ -273,9 +275,12 @@ public class ScheduleDb {
     }
 
     public int deleteOldSchudules() {
-        Date today = new Date();
-        SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String date = DATE_FORMAT.format(today);
+
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        df.setTimeZone(TimeZone.getDefault());
+        Date mDate = c.getTime();
+        String date = df.format(mDate);
         Log.d("currentDate", ",,,,,,,,," + date);
 
         int deleteValue = -1;
