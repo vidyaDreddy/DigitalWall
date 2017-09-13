@@ -1,5 +1,7 @@
 package com.digitalwall.utils;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.digitalwall.activities.DashboardActivity;
@@ -26,7 +28,7 @@ public class Downloader implements FetchListener {
 
     public Downloader(DashboardActivity parent, ArrayList<AssetsModel> assetList) {
 
-        Log.v("DOWNLOADER ASSETS:", "ASSET LIST:" + assetList.size());
+        Log.v("DOWNLOADER CLASS:", "ASSETS LIST COUNT:" + assetList.size());
         this.parent = parent;
         this.assetList = assetList;
         parent.fetch.addFetchListener(this);
@@ -38,13 +40,13 @@ public class Downloader implements FetchListener {
         for (int i = 0; i < assetList.size(); i++) {
             AssetsModel asset = assetList.get(i);
 
-            long assetDownId = generateDownloadId(asset.getAssetId());
-            String url = asset.getAssetUrl();
+            final long assetDownId = generateDownloadId(asset.getAssetId());
+            final String url = asset.getAssetUrl();
             if (Utils.isValueNullOrEmpty(asset.getAsset_local_url())) {
                 asset.setAsset_local_url(Utils.getFileDownloadPath(url));
                 parent.assetsSource.updateModelData(asset);
             }
-            String path = asset.getAsset_local_url();
+            final String path = asset.getAsset_local_url();
 
             RequestInfo info = parent.fetch.get(assetDownId);
             if (info != null) {
@@ -52,12 +54,17 @@ public class Downloader implements FetchListener {
                 if (file.exists()) {
                     if (info.getProgress() == 100) {
                         count++;
-                        //assetList.remove(i);
                     } else
                         parent.fetch.retry(assetDownId);
                 } else {
+                    boolean status = file.mkdirs();
                     parent.fetch.remove(assetDownId);
-                    enqueueDownload(assetDownId, url, path);
+                    new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            enqueueDownload(assetDownId, url, path);
+                        }
+                    }, 1000);
                 }
             } else {
                 enqueueDownload(assetDownId, url, path);
@@ -83,7 +90,7 @@ public class Downloader implements FetchListener {
         switch (status) {
             case Fetch.STATUS_ERROR:
                 Log.i("DOWNLOAD ERROR", "ASSET ID:" + id);
-                parent.fetch.retry(id);
+                //parent.fetch.retry(id);
                 break;
             case Fetch.STATUS_DOWNLOADING:
                 Log.i("DOWNLOADING", "ASSET ID:" + id + " Pro:" + progress);
@@ -92,13 +99,17 @@ public class Downloader implements FetchListener {
                 Log.i("DOWNLOADED", "ASSET ID:" + id);
                 count++;
                 break;
+            case Fetch.STATUS_REMOVED:
+                Log.i("DOWNLOAD REMOVED", "ASSET ID:" + id);
+                break;
         }
-
-        float per = (count / assetList.size()) * 100;
-        if (per < 100)
-            Log.i("DOWNLOAD", " DOWNLOADED [" + count + "/" + assetList.size() + "]");
-        else {
-            Log.i("DOWNLOAD COMPLETED", "COUNT :" + count);
+        if (status != Fetch.STATUS_REMOVED) {
+            float per = (count / assetList.size()) * 100;
+            if (per < 100)
+                Log.i("DOWNLOAD", " DOWNLOADED [" + count + "/" + assetList.size() + "]");
+            else {
+                Log.i("DOWNLOAD COMPLETED", "COUNT :" + count);
+            }
         }
     }
 
