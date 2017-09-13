@@ -2,17 +2,22 @@ package com.digitalwall.utils;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.TextView;
 
 import com.digitalwall.R;
 import com.digitalwall.activities.BaseActivity;
@@ -179,19 +184,23 @@ public class Utils {
 
     @SuppressLint("SetTextI18n")
     public static void showRegisterPlayerNoteView(DashboardActivity parent) {
+
         parent.ll_display_key.setVisibility(View.VISIBLE);
         parent.rl_main.setVisibility(View.GONE);
         parent.tv_reg_note.setText(Utils.getStrings(parent, R.string.txt_reg_note));
-        parent.tv_display_key.setText(Utils.getStrings(parent,R.string.txt_license_key)+ parent.display_key);
+        parent.tv_display_key.setText(Utils.getStrings(parent, R.string.txt_license_key) + parent.display_key);
     }
 
     public static void showPlayerSyncView(DashboardActivity parent) {
+        Utils.showProgressDialog(parent);
         parent.ll_display_key.setVisibility(View.VISIBLE);
         parent.rl_main.setVisibility(View.GONE);
         parent.tv_reg_note.setText(Utils.getStrings(parent, R.string.txt_auto_campaign_sync_note));
         parent.tv_display_key.setText(Utils.getStrings(parent, R.string.txt_player_reg_successfully));
     }
+
     public static void showPlayerSyncFailedView(DashboardActivity parent) {
+        Utils.hideProgressBar(parent);
         parent.ll_display_key.setVisibility(View.VISIBLE);
         parent.rl_main.setVisibility(View.GONE);
         parent.tv_reg_note.setText(Utils.getStrings(parent, R.string.txt_auto_campaign_sync_failed));
@@ -200,8 +209,38 @@ public class Utils {
 
 
     public static void hideRegisterPlayerView(DashboardActivity parent) {
+        Utils.hideProgressBar(parent);
         parent.ll_display_key.setVisibility(View.GONE);
         parent.rl_main.setVisibility(View.VISIBLE);
     }
+
+    private static Dialog showProgressDialog(BaseActivity baseActivity) {
+
+        Dialog mDialog = new Dialog(baseActivity,R.style.NewDialog);
+        mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        LayoutInflater mInflater = LayoutInflater.from(baseActivity);
+        mDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        View layout = mInflater.inflate(R.layout.progressbar_custom, null);
+        mDialog.setContentView(layout);
+
+        if (baseActivity.progressDialog != null) {
+            baseActivity.progressDialog.dismiss();
+            baseActivity.progressDialog = null;
+        }
+
+        baseActivity.progressDialog = mDialog;
+
+        mDialog.setCancelable(false);
+        mDialog.setCanceledOnTouchOutside(false);
+        mDialog.show();
+
+        return mDialog;
+    }
+
+    public static void hideProgressBar(BaseActivity parent) {
+        if (parent.progressDialog != null)
+            parent.progressDialog.dismiss();
+    }
+
 
 }
