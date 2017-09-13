@@ -24,6 +24,7 @@ public class Downloader implements FetchListener {
     private int count;
 
     private ArrayList<AssetsModel> assetList;
+    private ArrayList<AssetsModel> downloadList;
 
 
     public Downloader(DashboardActivity parent, ArrayList<AssetsModel> assetList) {
@@ -46,34 +47,35 @@ public class Downloader implements FetchListener {
                 asset.setAsset_local_url(Utils.getFileDownloadPath(url));
                 parent.assetsSource.updateModelData(asset);
             }
+
             final String path = asset.getAsset_local_url();
 
             RequestInfo info = parent.fetch.get(assetDownId);
             if (info != null) {
                 File file = new File(info.getFilePath());
-                if (file.exists()) {
-                    if (info.getProgress() == 100) {
-                        count++;
-                    } else
-                        parent.fetch.retry(assetDownId);
-                } else {
-                    boolean status = file.mkdirs();
+                if (!file.exists()) {
                     parent.fetch.remove(assetDownId);
                     new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             enqueueDownload(assetDownId, url, path);
                         }
-                    }, 1000);
-                }
-            } else {
+                    }, 500);
+                } else if (info.getProgress() == 100)
+                    count++;
+                else
+                    parent.fetch.retry(assetDownId);
+
+            } else
                 enqueueDownload(assetDownId, url, path);
-            }
+
         }
 
-        if (count == assetList.size()) {
+        if (count == assetList.size())
             Log.v("DOWNLOAD COMPLETED", "COUNT :" + count);
-        }
+        else
+            Log.v("DOWNLOAD SKIPPED", "COUNT :" + count);
+
     }
 
     private void enqueueDownload(long assetDownId, String url, String filePath) {

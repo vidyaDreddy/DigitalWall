@@ -102,7 +102,7 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
 
 
         fetch = Fetch.newInstance(this);
-        fetch.setAllowedNetwork(Fetch.NETWORK_ALL);
+        //fetch.setAllowedNetwork(Fetch.NETWORK_ALL);
 
         jobScheduler = SmartScheduler.getInstance(this);
 
@@ -196,7 +196,8 @@ public class DashboardActivity extends BaseActivity implements JSONResult,
         }
 
 
-        ScheduleModel scheduleModel = scheduleSource.getCurrentAvailableCampaign();
+        ScheduleModel
+                scheduleModel = scheduleSource.getCurrentAvailableCampaign();
         if (scheduleModel != null) {
 
             playAutoCampaignWithSavedData(autoCampaignId);

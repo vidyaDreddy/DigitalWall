@@ -206,7 +206,11 @@ public abstract class BaseSliderView {
                 String decodedImgUri = "file://" + mFile.toString();
                 UImageLoader.URLPicLoadingFile(targetImageView, decodedImgUri, R.drawable.icon_no_video);
             } else {
-                UImageLoader.URLPicLoadingFile(targetImageView, mUrl, R.drawable.icon_no_video);
+                if (mUrl.contains("https://")) {
+                    mUrl = mUrl.replace("https://", "http://");
+                    UImageLoader.URLPicLoadingFile(targetImageView, mUrl, R.drawable.icon_no_video);
+                } else
+                    UImageLoader.URLPicLoadingFile(targetImageView, mUrl, R.drawable.icon_no_video);
             }
         }
     }
