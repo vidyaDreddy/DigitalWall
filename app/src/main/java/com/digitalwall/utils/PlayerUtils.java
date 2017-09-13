@@ -106,7 +106,8 @@ public class PlayerUtils {
 
                     AssetsModel asset = mList.get(position);
                     sl_layout.setDuration(asset.getAssetDuration());
-                    sl_layout.setPresetTransformer(getAnimation(asset.getAsset_animation()));
+                    SliderLayout.Transformer transformer = getAnimation(asset.getAsset_animation());
+                    sl_layout.setPresetTransformer(transformer);
 
                /* JSONObject object = new JSONObject();
                 try {
@@ -134,7 +135,6 @@ public class PlayerUtils {
             });
 
 
-
         }
 
 
@@ -160,49 +160,49 @@ public class PlayerUtils {
         SliderLayout.Transformer mTransformer;
 
         switch (anim) {
-            case "Accordion":
+            case "accordion":
                 mTransformer = SliderLayout.Transformer.Accordion;
                 break;
-            case "Background2Foreground":
+            case "background2foreground":
                 mTransformer = SliderLayout.Transformer.Background2Foreground;
                 break;
-            case "CubeIn":
+            case "cubein":
                 mTransformer = SliderLayout.Transformer.CubeIn;
                 break;
-            case "DepthPage":
+            case "depthpage":
                 mTransformer = SliderLayout.Transformer.DepthPage;
                 break;
-            case "Fade":
+            case "fade":
                 mTransformer = SliderLayout.Transformer.Fade;
                 break;
-            case "FlipHorizontal":
+            case "flipHorizontal":
                 mTransformer = SliderLayout.Transformer.FlipHorizontal;
                 break;
-            case "FlipPage":
+            case "flipPage":
                 mTransformer = SliderLayout.Transformer.FlipPage;
                 break;
-            case "Foreground2Background":
+            case "foreground2background":
                 mTransformer = SliderLayout.Transformer.Foreground2Background;
                 break;
-            case "RotateDown":
+            case "rotatedown":
                 mTransformer = SliderLayout.Transformer.RotateDown;
                 break;
-            case "RotateUp":
+            case "rotateUp":
                 mTransformer = SliderLayout.Transformer.RotateUp;
                 break;
-            case "Stack":
+            case "stack":
                 mTransformer = SliderLayout.Transformer.Stack;
                 break;
-            case "Tablet":
+            case "tablet":
                 mTransformer = SliderLayout.Transformer.Tablet;
                 break;
-            case "ZoomIn":
+            case "zoomIn":
                 mTransformer = SliderLayout.Transformer.ZoomIn;
                 break;
-            case "ZoomOutSlide":
+            case "zoomoutslide":
                 mTransformer = SliderLayout.Transformer.ZoomOutSlide;
                 break;
-            case "ZoomOut":
+            case "zoomout":
                 mTransformer = SliderLayout.Transformer.ZoomOut;
                 break;
             default:
