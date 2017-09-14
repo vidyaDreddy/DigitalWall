@@ -153,8 +153,8 @@ public class AssetsSource {
 
         open();
         updateValue = mDatabase.update(DBConstants.TABLE_ASSETS, values,
-                DBConstants.COLUMN_ASSET_ID + " = ?" + " AND " + DBConstants.CHANNELS_ID + " = ?",
-                new String[]{model.getAssetId(), model.getChannel_id()});
+                DBConstants.COLUMN_ASSET_ID + " = ?" ,
+                new String[]{model.getAssetId()});
         close();
         return updateValue;
     }
