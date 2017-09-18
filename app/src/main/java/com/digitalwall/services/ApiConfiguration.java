@@ -24,11 +24,10 @@ public class ApiConfiguration {
 
 
     private static final String BASE_SERVER_URL = "https://dev.digitalwall.in/dw/";
-    private static final String BASE_SERVER_URL1 = "http://dev.digitalwall.in/dw/";
     public static final String OUTPUT_FILTER = "?outputFIlters={\"campaingID\":1,\"layout\":1}";
 
     //ADD A DEVICE
-    public static final String DEVICES = BASE_SERVER_URL1 + "user/register";
+    public static final String DEVICES = BASE_SERVER_URL + "user/register";
     public static final int DEVICES_CODE = 1;
 
     public static final int GET_CAMPAIGN_INFO_CODE = 2;

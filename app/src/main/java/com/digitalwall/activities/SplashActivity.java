@@ -1,10 +1,8 @@
 package com.digitalwall.activities;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -16,11 +14,8 @@ import com.digitalwall.R;
 import com.digitalwall.model.DeviceModel;
 import com.digitalwall.services.ApiConfiguration;
 import com.digitalwall.services.InputParams;
-import com.digitalwall.services.JSONRawTask;
 import com.digitalwall.services.JSONResult;
-import com.digitalwall.utils.AssetUtils;
-import com.digitalwall.utils.DeviceInfo;
-import com.digitalwall.utils.DownloadUtils;
+import com.digitalwall.services.JSONTask;
 import com.digitalwall.utils.Permissions;
 import com.digitalwall.utils.Utils;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -28,12 +23,10 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-
 public class SplashActivity extends BaseActivity implements JSONResult {
 
     private Handler handler;
-    private JSONRawTask generateUnSignesAccessTask;
+    private JSONTask generateUnSignesAccessTask;
 
 
     @Override
@@ -128,8 +121,9 @@ public class SplashActivity extends BaseActivity implements JSONResult {
             generateUnSignesAccessTask.cancel(true);
 
         JSONObject params = InputParams.registerDeviceParams(this);
-        generateUnSignesAccessTask = new JSONRawTask(this);
-        generateUnSignesAccessTask.setMethod(JSONRawTask.METHOD.POST);
+
+        generateUnSignesAccessTask = new JSONTask(this);
+        generateUnSignesAccessTask.setMethod(JSONTask.METHOD.POST);
         generateUnSignesAccessTask.setCode(ApiConfiguration.DEVICES_CODE);
         generateUnSignesAccessTask.setServerUrl(ApiConfiguration.DEVICES);
 

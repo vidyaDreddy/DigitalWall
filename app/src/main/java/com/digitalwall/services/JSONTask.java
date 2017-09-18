@@ -35,7 +35,7 @@ public class JSONTask extends AsyncTask<Object, Integer, Object> {
 
     private WeakReference<JSONResult> WEAK_JSON_RESULT;
     private ArrayMap<String, String> HEADER_MAP;
-    private HashMap<?, ?> INPUT_PARAMS;
+    private JSONObject INPUT_PARAMS;
 
     private int CODE = -1;
     private int CONNECTION_TIME_OUT = 8000;
@@ -113,7 +113,7 @@ public class JSONTask extends AsyncTask<Object, Integer, Object> {
             case "POST":
                 if (INPUT_PARAMS != null) {
                     try {
-                        String param1 = urlEncodeUTF8(INPUT_PARAMS);
+                        String param1 = INPUT_PARAMS.toString();
                         OutputStream os = connection.getOutputStream();
                         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
                         writer.write(param1);
@@ -131,7 +131,7 @@ public class JSONTask extends AsyncTask<Object, Integer, Object> {
             case "PUT":
                 if (INPUT_PARAMS != null) {
                     try {
-                        String param1 = urlEncodeUTF8(INPUT_PARAMS);
+                        String param1 = INPUT_PARAMS.toString();
                         OutputStream os = connection.getOutputStream();
                         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
                         writer.write(param1);
@@ -300,7 +300,7 @@ public class JSONTask extends AsyncTask<Object, Integer, Object> {
     /*
       * SET THE PARAMS
       * */
-    public HashMap<?, ?> setParams(HashMap<?, ?> params) {
+    public JSONObject setParams(JSONObject params) {
         return INPUT_PARAMS = params;
     }
 
